@@ -20,7 +20,7 @@ from conftest import FakeSession
 
 
 def test_the_package_carries_a_release_version():
-    assert heresay.__version__ == "1.62.67"
+    assert heresay.__version__ == "1.63.0"
     assert re.fullmatch(r"\d+\.\d+\.\d+", heresay.__version__)
 
 

@@ -1168,11 +1168,15 @@ are not. It is excluded from the deploy rsync.
 ### Top level
 
 - `source_url` — where this house's source can be had; `.source` prints it beside
-  the running version. ⛔ **A public instance must set this.** The AGPL's §13
+  the running version. ⚠ **The shipped default is the upstream engine's own
+  source, `https://github.com/generic37/heresay`**, and that is the right answer
+  for an unmodified copy: the URL really does serve the code the house is
+  running. ⛔ **Change it the moment you modify the engine.** The AGPL's §13
   obliges an operator running a *modified* Heresay as a network service to offer
-  its users the corresponding source, and a repository somebody else can find is
-  not an offer to a user standing at a text prompt. Unset, `.source` says so
-  plainly rather than naming an upstream this house may no longer match.
+  its users the **corresponding** source — the code they are actually talking to
+  — and upstream is no longer that; a repository somebody else can find is not an
+  offer to a user standing at a text prompt. ⚠ Set to the empty string, `.source`
+  says so plainly rather than naming an upstream this house may no longer match.
 
 There is nothing to configure about the login notice: **`You have mail.` fires
 at login when the box holds something UNREAD**, and reading it with `.mail`
@@ -1327,7 +1331,7 @@ the local console on 127.0.0.1:2324, the browser door on 127.0.0.1:8765.
 A slightly fuller dev shape, if you want the state kept out of the way:
 
 ```toml
-source_url = "https://example.invalid/your-fork"   # AGPL §13 — see §6 "Top level"
+source_url = "https://github.com/generic37/heresay"   # AGPL §13 — see §6 "Top level"
 
 [storage]
 house_dir      = "house"        # the content root; everything authored is under it

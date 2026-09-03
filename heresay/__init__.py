@@ -12,4 +12,4 @@ conversation is never written to disk.
 # middle digit moves when behaviour changes, the last for a fix or for anything
 # that executes no differently at all (prose, comments, tooling), the first for a
 # change to the covenant itself. The full rule is CLAUDE.md, "The version number".
-__version__ = "1.62.67"
+__version__ = "1.63.0"

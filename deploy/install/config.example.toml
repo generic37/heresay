@@ -8,12 +8,16 @@
 # would resolve there — state must live under /var/lib/heresay instead).
 
 # ⛔ AGPL §13 — where THIS house's source can be had (v1.50.0). `.source` prints
-# it beside the running version. A public instance MUST set this: the licence
-# obliges an operator running a modified Heresay as a network service to offer
-# its users the corresponding source, and a repository somebody else can find is
-# not an offer to a user standing at a text prompt. Unset, `.source` says so
-# plainly rather than naming an upstream this house may no longer match.
-source_url = "https://example.invalid/your-heresay-fork"
+# it beside the running version.
+#
+# ⚠ The default below is the UPSTREAM engine's own source, and it is correct for
+# an unmodified copy: that URL really does serve the code this house is running.
+# ⛔ **CHANGE IT THE MOMENT YOU MODIFY THE ENGINE.** The licence obliges an
+# operator running a MODIFIED Heresay as a network service to offer its users the
+# CORRESPONDING source — the code they are actually talking to — and upstream is
+# no longer that. A repository somebody else can find is not an offer to a user
+# standing at a text prompt.
+source_url = "https://github.com/generic37/heresay"
 
 [listeners]
 # Public TLS door. 2323 is > 1024, so the daemon binds it without root.

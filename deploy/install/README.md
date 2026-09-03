@@ -216,9 +216,10 @@ value still carrying one:
 - **`[moderation] owner`** — the account name that OWNS this house (§8 claims it).
 - **`[world] instance_name`** — what the house calls itself on screen.
 
-⚠ **A third is not fatal but should not be left as shipped:** `source_url` ships as
-`https://example.invalid/your-heresay-fork`. AGPL §13 obliges a public house to offer
-its users the corresponding source, and `.source` prints whatever is in there.
+⚠ **A third is not fatal and is correct as shipped if you have not touched the engine:**
+`source_url` defaults to `https://github.com/generic37/heresay`, the upstream source.
+⛔ **Change it the moment you modify the engine** — AGPL §13 obliges a public house to
+offer its users the *corresponding* source, and `.source` prints whatever is in there.
 
 The paths already point at `/opt/heresay/house` and `/var/lib/heresay` and need no
 change.
@@ -226,7 +227,8 @@ change.
 ```bash
 sudo sed -i 's/^owner = .*/owner = "YOUR-ADMIN-NAME"/'          /etc/heresay/config.toml
 sudo sed -i 's|^instance_name = .*|instance_name = "YOUR-HOUSE-NAME"|' /etc/heresay/config.toml
-# then set source_url, and review the [ratelimit]/[mail] dials while you are in there:
+# then review source_url (only if you modified the engine) and the
+# [ratelimit]/[mail] dials while you are in there:
 sudoedit /etc/heresay/config.toml
 ```
 

@@ -26,13 +26,16 @@
 # almost never what you meant for state. Use ABSOLUTE paths on a real server.
 
 
-# ⛔ AGPL §13 — where the source of THIS house can be had. The licence obliges
-# an operator running a modified Heresay as a network service to offer its users
-# the corresponding source, and a repository somebody else can find is not an
-# offer to a user standing at a text prompt. `.source` prints this beside the
-# running version. If you have not modified the engine, point it at wherever you
-# got it.
-source_url = "[source_url]"
+# ⛔ AGPL §13 — where the source of THIS house can be had. `.source` prints it
+# beside the running version.
+#
+# ⚠ The default is the UPSTREAM engine's own source, which is the right answer
+# for an unmodified copy. ⛔ **CHANGE IT THE MOMENT YOU MODIFY THE ENGINE**: the
+# licence obliges an operator running a MODIFIED Heresay as a network service to
+# offer its users the CORRESPONDING source — the code they are actually talking
+# to — and a repository somebody else can find is not an offer to a user standing
+# at a text prompt.
+source_url = "https://github.com/generic37/heresay"
 
 
 [listeners]
