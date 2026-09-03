@@ -1,0 +1,6 @@
+name: parlour
+exits: oak, glade, concourse
+
+A long table under an awning, laid for far more people than are ever here
+at once, and never cleared. The teapot is warm. Nobody admits to having
+made it.

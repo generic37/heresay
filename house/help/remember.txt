@@ -1,0 +1,23 @@
+remember — stay logged in on this device (browser only)
+
+  .remember on|off     turn it on, or off and sign out every device
+
+Off unless you turn it on. With it on, a browser logs you back in
+without your password for 30 days; each visit renews that, 30 unused
+days ends it.
+
+To stay logged in, just close or background the tab. It has to work
+that way: a phone throws away a backgrounded tab to save memory, and
+a thrown-away tab looks exactly like a fresh one when you return.
+Nothing can tell "I closed it" from "the phone tidied up" — so
+without this, glancing at a text costs you your password.
+
+To log out, use .quit. That signs you out on every device, not just
+this one, and you type your password next time. It does NOT turn this
+setting off, so that next login remembers you again. Use .remember
+off to stop being remembered at all.
+
+What's stored is an opaque token, not your password, and it cannot
+become one. Changing your password also signs out every device.
+
+On a borrowed or shared device, leave it off, or .quit when done.

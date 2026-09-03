@@ -1,0 +1,5 @@
+name: refectory
+exits: plaza, concourse
+
+Trestle tables, benches, and the particular echo of a room built for
+eating in. It smells faintly and permanently of bread.

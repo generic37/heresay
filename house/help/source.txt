@@ -1,0 +1,10 @@
+.source — where this house's code comes from
+
+Prints the version running here and the address of its source.
+
+Heresay is free software under the AGPL. If you are talking to a
+modified copy, the licence says you are entitled to that copy's
+source, and this is the house telling you where to find it.
+
+If it says the URL is not configured, the operator has not set one:
+ask the owner.

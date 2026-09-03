@@ -1,0 +1,11 @@
+.gag — take someone's voice, visibly (staff)
+
+  .gag <name>     they can be heard by no one, anywhere
+
+The room is TOLD ("Name has been silenced by the staff") — a silence
+nobody can see is a silence nobody can appeal. The gagged keep exactly
+one channel: .call_staff to reach staff, and a .tell to any of them.
+Session-scoped: a relog clears it, so it is a cooling-off, not a
+sentence. Logged as a fact (who, what, whom).
+
+Reach for .jail instead when the problem is where they are, not their voice.

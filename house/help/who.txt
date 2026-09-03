@@ -1,0 +1,6 @@
+.who — who is on
+
+Everyone connected: name and description read as one sentence, then
+the room they stand in and how long since they last typed. (AFK)
+after a name means they said they'd stepped away. Idle is honest
+and harmless: nobody is ever disconnected for it though reboots happen.

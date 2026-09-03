@@ -1,0 +1,7 @@
+name: cabin
+exits: copse, concourse
+lockable: yes
+
+One room, one window, one chimney doing its best. Firewood stacked with
+care along the whole of the south wall, and a bolt on the inside of the
+door.

@@ -1,0 +1,117 @@
+# your.domain.example — the browser door (production).
+#
+# REPLACE `your.domain.example` throughout with your own domain before installing.
+#
+# Caddy obtains and auto-renews a Let's Encrypt certificate for this domain; no
+# TLS config belongs here beyond the site address. Install to /etc/caddy/Caddyfile
+# and `systemctl reload caddy`.
+#
+# The raw TLS heresay socket on :2323 is a SEPARATE door served by the heresay
+# daemon itself. It reuses THIS domain's certificate: a daily timer
+# (heresay-cert-copy) copies Caddy's stored LE cert into /etc/heresay/tls/ and
+# restarts heresay whenever it changes. Caddy neither proxies nor knows about 2323.
+#
+# TRUSTED PROXY: this proxy adds X-Forwarded-For; the daemon's config.toml sets
+# trusted_proxy = "127.0.0.1" so per-IP limits see the real client, not Caddy.
+
+# ---- :80, and why it is a site block of its own (2026-09-01) --------------
+#
+# ⛔ GIVEN NO EXPLICIT http:// SITE, CADDY ANSWERS :80 FROM ITS OWN AUTOMATIC
+# REDIRECT SERVER — and that server inherits NOTHING from the block below,
+# `-Server` included. Measured from off the box: the redirect itself was
+# correct (308 → https, Connection: close) and it carried `Server: Caddy`.
+#
+# ⚠ One header on one response nobody reads is a small thing. A claim this
+# repository makes that is FALSE on a live port is not: "no server banner" was
+# true of :443 and not of :80. This block does the same redirect and strips the
+# header, so the claim covers both doors rather than being narrowed to one.
+#
+# ⚠ `header` is ordered before `redir`, so the header is set on the redirect
+# response. The 308 keeps the method, which is what Caddy's automatic server
+# does — this replaces that server, it does not sit in front of it.
+http://your.domain.example {
+	header -Server
+	redir https://your.domain.example{uri} 308
+}
+
+your.domain.example {
+	root * /opt/heresay/web
+	encode zstd gzip
+
+	# ---- security headers (v1.49.0, audit B1) --------------------------
+	#
+	# The page is ONE self-contained file plus one self-hosted font: no CDN, no
+	# analytics, no fetch of any kind. That promise is currently kept by the
+	# code alone. These headers make the BROWSER enforce it, which is a
+	# different and better kind of guarantee — and it is what would contain the
+	# damage if script injection ever became possible.
+	#
+	# ⛔ EVERY SOURCE BELOW IS SOMETHING THE PAGE ACTUALLY NEEDS. Checked
+	# against web/index.html rather than copied from a template:
+	#   script-src 'unsafe-inline'  the page's one inline <script>
+	#   style-src  'unsafe-inline'  the page's one inline <style>
+	#   font-src   'self'           IBMPlexMono-Regular.woff2, served from here
+	#   img-src    'self' data:     the favicon link — the blank `data:,`, the
+	#                               house icon the server pushes as a data: URL,
+	#                               and the canvas-drawn alert dot
+	#   connect-src 'self'          the WebSocket to wss://this-domain/ws
+	# Everything else is 'none'.
+	#
+	# ⚠ `script-src 'unsafe-inline'` is the honest-but-weak part, and it is
+	# weak because the script IS inline. The stronger form is a hash
+	# (`'sha256-…'`), which pins the exact script — but the hash changes on
+	# every edit to index.html, so it needs a regenerate-on-release step that
+	# does not exist yet. Recorded as a later refinement, not done here.
+	#
+	# ⚠ `connect-src 'self'` covers same-origin `wss://` under CSP Level 3, and
+	# every current browser implements that. If your browser blocks the
+	# WebSocket upgrade (the page loads but never connects), swap in the
+	# explicit form on the commented line below — that is the ONE thing to
+	# check after reloading Caddy.
+	header {
+		Content-Security-Policy "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+		# Fallback if the WebSocket is blocked — replace with YOUR domain:
+		# Content-Security-Policy "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self' wss://your.domain.example; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+		-Server
+	}
+
+	# Nothing here takes an upload. A body cap is free, and it is the one
+	# request-shaped resource an anonymous stranger could otherwise choose the
+	# size of. (The WebSocket upgrade carries no body, so this does not touch
+	# it — the frame cap for that is `WS_MAX_FRAME` in the daemon.)
+	request_body {
+		max_size 64KB
+	}
+
+	# The browser connects to wss://your.domain.example/ws. TLS terminates
+	# here; the upgraded WebSocket is proxied to the localhost-only WS door.
+	@ws path /ws
+	reverse_proxy @ws 127.0.0.1:8765 {
+		# Replace any client-supplied X-Forwarded-For with the real peer, so a
+		# browser can't forge its apparent IP (the daemon also defends by taking
+		# only the rightmost, trusted hop). Defense in depth.
+		#
+		# ⛔ THIS ASSUMES CADDY IS THE TRUE EDGE, and the assumption is load-
+		# bearing. `{remote_host}` is whoever connected to Caddy — so if a CDN,
+		# a load balancer or a second proxy is ever put in front of it, that is
+		# the address every request gets stamped with, and EVERY CLIENT
+		# COLLAPSES TO ONE rate-limit and ban key.
+		#
+		# ⚠ Both failure directions are bad and neither is loud: one abuser
+		# throttles or gets everybody banned, and nobody can be told apart when
+		# you need to ban just them. Nothing errors — the limits simply stop
+		# meaning what they say.
+		#
+		# Fronting this with a CDN therefore means reworking the XFF handling
+		# FIRST (trust the CDN's own client-IP header, and only from the CDN's
+		# addresses). Do not add one and assume this line still holds.
+		header_up X-Forwarded-For {remote_host}
+	}
+
+	# Everything else is the static, self-contained page (and its font).
+	file_server
+}

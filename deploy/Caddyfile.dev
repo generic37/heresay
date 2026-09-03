@@ -1,0 +1,41 @@
+# Local verification only — NOT for deployment.
+#
+# Proves this repo's web/ + /ws proxy shape works end to end over TLS, using
+# Caddy's built-in local CA (no Let's Encrypt, no public DNS).
+#
+#   Run the heresay daemon first (make run), then:
+#     caddy run --config deploy/Caddyfile.dev --adapter caddyfile
+#   Open  https://localhost:8443  and accept the local CA prompt once.
+#
+# The page auto-detects https and connects to wss://localhost:8443/ws, which
+# Caddy proxies to the dev WebSocket door on 127.0.0.1:8765.
+#
+# ⚠ IT CARRIES THE SAME SECURITY HEADERS AS THE PRODUCTION EXAMPLE (v1.49.0),
+# and that is the point of keeping it in step: a Content-Security-Policy is the
+# one piece of this deployment that can WHITE-SCREEN the page, and this is the
+# only place to find that out without doing it to the live site. If the page
+# loads here and the WebSocket connects, the policy is right.
+#
+# Open the browser console while you do it: CSP failures are reported there and
+# almost nowhere else.
+
+localhost:8443 {
+	root * ./web
+
+	# Kept byte-identical to deploy/install/Caddyfile.example, minus HSTS —
+	# which has no business being pinned into a browser for `localhost`.
+	header {
+		Content-Security-Policy "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+		-Server
+	}
+	request_body {
+		max_size 64KB
+	}
+
+	@ws path /ws
+	reverse_proxy @ws 127.0.0.1:8765
+	file_server
+}

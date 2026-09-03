@@ -1,0 +1,15 @@
+.ban — refuse an account entry (staff)
+
+  .ban <name>          24 hours (the default)
+  .ban <name> <hours>  a specific length
+
+Bans the ACCOUNT. For the address someone is connecting from, see
+.ban_ip — they were one command until v1.32.0, and banning a person and
+banning an address are different enough to be asked for separately.
+
+You can only ban someone BELOW your own rank. Not a peer, not anyone
+above you, and never the owner.
+
+Persists across restarts and expires on its own. Deleting an account does
+NOT lift a ban on its name — deletion must not be a way around one.
+Recorded as a fact.

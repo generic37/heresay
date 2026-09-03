@@ -1,0 +1,20 @@
+staff_actions — what the staff have done lately
+
+  .staff_actions        the last 20, newest first
+  .staff_actions <n>    the last n (up to 200)
+
+When, who, what, and to whom — a gag, a jail, a ban, a promotion, a
+setting changed. Never why: no reason and no message content is kept,
+because none is recorded anywhere.
+
+An Outcome column appears when something on the screen has one. Only
+.ban_ip does: it is recorded whether it is confirmed or cancelled,
+because being shown who shares an address is itself worth noting. The
+word says which happened, so a cancelled attempt cannot be misread as
+a ban. On a narrow screen it sits beside the time.
+
+The house remembers these for a set number of days and then forgets
+them, like everything else here. An action older than that window is
+gone; this screen only ever shows what is still held.
+
+owner only.

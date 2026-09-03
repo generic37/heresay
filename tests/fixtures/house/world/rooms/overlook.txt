@@ -1,0 +1,5 @@
+name: overlook
+exits: spring, concourse
+
+A shelf of rock with the whole valley laid out below it and nothing at all
+between you and the drop. A good place to sit and be quiet at.

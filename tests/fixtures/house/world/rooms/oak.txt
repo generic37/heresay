@@ -1,0 +1,6 @@
+name: oak
+exits: atrium, hall, copse, thicket, parlour, concourse
+
+One enormous tree standing on its own, with a bench round the trunk and
+initials cut into the bark going back further than the bench does. The
+canopy is its own weather.

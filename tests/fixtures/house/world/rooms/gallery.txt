@@ -1,0 +1,6 @@
+name: gallery
+exits: mirror_hall, atrium, lawn, lodge, concourse
+
+A long room hung with pictures of rooms. Some of them you recognise. One
+of them is this one, painted from where you are standing, which is either a
+compliment or a warning.

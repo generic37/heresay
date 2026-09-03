@@ -1,0 +1,6 @@
+.topic — a public banner
+
+.topic <text> sets the text for a current topic; everyone present sees it
+set. Shown below the exits in .look and to arrivals. Bare .topic
+re-shows it. It belongs to the gathering, not the room: when the last
+person leaves, it vanishes with them.

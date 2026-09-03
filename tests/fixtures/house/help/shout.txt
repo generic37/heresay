@@ -1,0 +1,5 @@
+.shout — heard everywhere
+
+.shout <text> reaches every room in the house at once. It is loud,
+it is rare, and it has its own slow cooldown. If you find yourself
+shouting twice in a minute, the house may ask you to breathe.

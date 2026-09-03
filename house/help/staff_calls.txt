@@ -1,0 +1,19 @@
+staff_calls — who has been reaching for staff
+
+  .staff_calls          a tally over the last day, busiest first
+
+Two doors lead to the staff: .call_staff, which interrupts everyone
+awake, and .mail_staff, which waits in the shared letterbox. This
+counts both, one line per resident, so someone who has called eleven
+times since breakfast is the first name on the screen.
+
+Names and counts, nothing else. Not what anyone said — a call is
+never written down, and a note is mail, read by the people it was
+addressed to. Not when, and not where from.
+
+The window is the house's staff_calls_window_hours (a day by
+default), and can never reach further back than the event log keeps.
+
+A quiet day shows one line saying so. That is the good outcome.
+
+Staff and the owner.

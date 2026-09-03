@@ -1,0 +1,9 @@
+.mail — talker mail
+
+.mail alone reads your box. .mail <name> <text> sends a line to
+anyone, online or not; .mail <name> opens the editor for a longer
+letter (.end sends, .abort discards). .dmail <n> deletes indicated
+mail, really deletes. Note that numbers may reassign upon a delete. 
+Mail is held encrypted until the recipient deletes it, or 180 days
+pass. You'll see "You have mail." at login, and only at login, if 
+you have unread mail.

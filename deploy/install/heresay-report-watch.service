@@ -1,0 +1,18 @@
+# Follows events.jsonl and nudges when a report is filed. Long-running, like
+# the ceiling watcher and unlike every timer in this kit — hence Restart=always:
+# a watcher that dies silently is worse than no watcher, because you believe you
+# are covered.
+#
+# ⛔ The nudge carries NO content — see heresay-report-watch.sh. The body is read
+# in-world with .read_report and nowhere else.
+[Unit]
+Description=Nudge when a heresay report is filed (events.jsonl)
+After=heresay.service
+
+[Service]
+ExecStart=/usr/local/bin/heresay-report-watch.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

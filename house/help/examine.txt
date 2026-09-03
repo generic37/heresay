@@ -1,0 +1,11 @@
+.examine — look closer
+
+.examine <name> shows user description and profile, online or not.
+See .desc and .profile. Users indicated as staff may be contacted
+for assistance either directly or via .call_staff <text> / .mail_staff.
+
+.examine on its own examines YOU — the same screen anyone else gets
+when they look you up, marking and all. Worth a glance after setting
+a .desc or a .profile, to see how it reads to a stranger.
+
+Shortcuts are: .ex .exa

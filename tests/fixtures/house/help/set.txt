@@ -1,0 +1,25 @@
+set — your display preferences, all in one grammar
+
+  .set                  list them all, marking the house defaults
+  .set <topic>          show one, and how to change it
+  .set <topic> <value>  set it
+  .set <topic> default  back to the house default
+  .set default          all eight back to the house default
+
+dim        on|off      fade system lines so speech stands out (web: .theme)
+time       on|off      prefix lines with HH:MM, for you alone
+helpstyle  long|short  which .help you get
+enter_msg  text        walking into a room: "Name <text>"
+exit_msg   text        walking out of a room; yours names no destination
+afk_msg    text        what a bare .afk says: "Name is AFK: <text>"
+login_msg  phrase      your login line, shown as [Name <phrase>]
+logout_msg phrase      your logout line, shown as [Name <phrase>]
+
+Every default here is the HOUSE default. While you are on it you follow
+the house: if the owner rewords it, your next line changes with it,
+no relogging. Choose your own and it is yours until you say 'default'.
+
+name is the exception: .set name <NewCapitalization> restyles your own
+name's capitalization. That is an identity restyle, not a display
+preference, so it has no 'default' and '.set default' leaves it alone —
+as it leaves .remember alone, for the same reason.

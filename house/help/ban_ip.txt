@@ -1,0 +1,25 @@
+.ban_ip — ban the address someone is on (owner)
+
+  .ban_ip <name>          24 hours (the default)
+  .ban_ip <name> <hours>  a specific length
+
+You name a PERSON and the house finds the address: their live session if
+they are connected, otherwise the last one they logged in from, if that
+was recent enough to still be remembered. If they are offline and have
+not been seen in a while there is no address to ban, and you are told so
+— nothing about where people connect from is kept any longer than the
+rest of the operational record.
+
+An address is not a person. It can be a house, a flat share, a college
+block, or a whole phone network. So before it does anything it tells you
+how many accounts have been seen on that address and which of them are
+on it now, and asks. Anything but a plain y leaves it alone.
+
+You can only do this to someone BELOW your own rank, and an address that
+carries staff is not yours to ban at all: if the ban would reach any
+staff account, you are told that much and no more, and it stops there.
+Only the owner can go on — and only after being told which staff it
+would catch, and saying so again.
+
+The owner's address is never refused, and the local console never is
+either — the house cannot be locked away from the person who keeps it.

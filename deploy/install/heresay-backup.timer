@@ -1,0 +1,10 @@
+# Nightly at 03:30 UTC: back up /var/lib/heresay, keep the newest 14.
+[Unit]
+Description=Nightly heresay state backup (03:30 UTC)
+
+[Timer]
+OnCalendar=*-*-* 03:30:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

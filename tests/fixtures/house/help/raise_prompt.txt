@@ -1,0 +1,12 @@
+.raise_prompt — lift the input line off the bottom edge (web client)
+
+  .raise_prompt       say where it is now
+  .raise_prompt <N>   SET it N lines up (a positive number is absolute)
+  .raise_prompt -<N>  LOWER it by N from here (a negative one is relative)
+  .raise_prompt 0     back to the floor
+  So `.raise_prompt 4` puts it four lines up; `-1` then leaves it at three.
+  Clamped to the house bounds (.ownerset raise_prompt_min / _max).
+
+For when an auto-hidden taskbar slides up over the line you type into. The
+browser handles it and remembers it; nothing reaches the house, and nobody
+else sees any difference. Socket doors have no use for it.

@@ -1,0 +1,40 @@
+.ownerset — house-wide runtime settings (owner only)
+
+View and tune the house's own words and defaults. Changes persist across
+restarts (in the server's state dir, not theme.toml).
+
+  .ownerset                 list every key, its value, and its default
+  .ownerset <key> <value>   set a key
+  .ownerset <key> default   reset a key to its built-in default
+
+You set the WORDS; the house keeps the grammar. The brackets, the stars and
+the name are the engine's and cannot be typed away:
+
+  login_msg          [Name <phrase>]           logging in
+  logout_msg         [Name <phrase>]           logging out
+  jail_logon_msg     [*** Name <phrase> ***]   logging in while jailed
+  enter_msg          Name <phrase>             walking into a room
+  exit_msg           Name <phrase>             walking out of a room
+  afk_msg            Name is AFK: <phrase>     going AFK in a room
+  jail_msg           shown to a resident when jailed
+  release_msg        shown to a resident when freed
+  jail_reply_msg     shown to staff who .tell/.remote a jailed resident
+
+The last three are whole lines, standing alone; no name is added. exit_msg
+may contain <room>, replaced with where they went.
+
+  broadcast_scope    'world' (every occupied room) or 'entry' (entry only)
+  desc               house default for a resident's .desc (ships empty)
+  profile            house default for .profile — multi-line, so:
+                       .ownerset profile          show it
+                       .ownerset profile edit     write it (editor)
+                       .ownerset profile default  clear it
+
+  dim                on / off    the display switches an unset resident gets
+  time               on / off
+  helpstyle          long / short
+
+Residents override enter/exit/afk/login/logout with .set. Anyone who has
+not set their own follows the house, and moves the moment you do — except
+the three switches, which a session reads at login, so those reach people
+the next time they log in.

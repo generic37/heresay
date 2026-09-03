@@ -1,0 +1,9 @@
+.logins — open or close new logons (owner)
+
+  .logins        show the current setting
+  .logins off    nobody new may log in
+  .logins on     open again
+
+The owner can always get in, so this cannot lock you out of your own
+house. Sessions already connected are untouched; it refuses NEW logons.
+Persists across restarts. Pair with .logoutall to empty the place.

@@ -1,0 +1,12 @@
+.bans — what is currently banned (staff)
+
+Lists every ban in force: account bans under the account's name, and
+address bans under the name of whoever they were placed on. Who set it,
+why, and when it runs out.
+
+Expired bans are not listed. They lift themselves, and a ban that has
+ended is not news.
+
+No addresses appear here. An address ban reads as the person it was
+placed on, which is how it was placed and so how it reads back — the
+house resolves addresses, it does not show them.

@@ -1,0 +1,6 @@
+.invite — invite user to teleport to your location
+
+.invite <name> asks someone to join you, wherever you both are.
+They type .join <yourname> and arrive at your side — through
+geography and locked doors alike. It lapses after five minutes, 
+or when you move on.

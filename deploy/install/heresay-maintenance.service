@@ -1,0 +1,15 @@
+# Monthly patch + prune + report + reboot. Triggered by
+# heresay-maintenance.timer; see heresay-maintenance.sh for what it does
+# and why the reboot is unconditional.
+[Unit]
+Description=Monthly heresay maintenance (patch, prune, report, reboot)
+# Don't start patching mid-boot, and don't fight the network coming up.
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/heresay-maintenance
+# apt can be slow on a small box; give it room rather than leaving a half-
+# upgraded system behind.
+TimeoutStartSec=45min

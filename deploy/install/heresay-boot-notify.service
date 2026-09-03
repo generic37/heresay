@@ -1,0 +1,35 @@
+# One buzz when the host comes up. ⚠ `enable`, NOT `enable --now` — starting it
+# by hand would announce a boot that did not happen.
+#
+# It earns its place because of the monthly maintenance reboot: an unattended
+# restart that comes back is a fact worth one line, and one that does NOT come
+# back is announced by this message never arriving.
+#
+# ⛔ It reports the SERVICE STATES; it does not tell the operator to go and look.
+# The message body and the bounded wait behind it are in
+# heresay-boot-notify.sh — a unit file cannot sample a state, and a shell
+# one-liner in ExecStart would be a second place for that logic to live.
+[Unit]
+Description=Notify that the host booted
+After=network-online.target
+Wants=network-online.target
+# ⛔ ORDERING ONLY, and deliberately NOT Wants= or Requires=. `After=` waits for
+# these two if they are starting in this boot and is a no-op otherwise — so it
+# neither pulls a service into the boot transaction (which would be enabling one
+# by the back door) nor fails this notice when one of them fails, which is the
+# case the buzz matters most in.
+# ⚠ And it is not sufficient by itself: `After=` orders the START of a job, and
+# heresay is Type=simple, so it is "started" the instant it execs. The script's
+# bounded poll is what closes that gap; this line only narrows it.
+After=heresay.service caddy.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/heresay-boot-notify.sh %H
+# ⛔ The hard ceiling over the script's own bound: BOOT_WAIT (30s) plus the
+# notifier's 10s curl timeout, with room to spare. A wedged notice can then
+# never be the reason multi-user.target sits activating.
+TimeoutStartSec=60
+
+[Install]
+WantedBy=multi-user.target

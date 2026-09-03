@@ -1,0 +1,6 @@
+name: spring
+exits: orchard, stall, overlook, shore, grotto, concourse
+
+Water comes up out of the rock here, cold enough to hurt, and goes away
+downhill in a hurry. There is a stone lip worn into a seat by people who
+came to fill something and stayed.

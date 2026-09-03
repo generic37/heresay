@@ -1,0 +1,8 @@
+.newusers — open or close account creation (owner)
+
+  .newusers        show the current setting
+  .newusers off    no new accounts may be created
+  .newusers on     open again
+
+Persists across restarts. Existing residents are unaffected — it closes the
+door to NEW names only. Use .logins to close the door to everyone.

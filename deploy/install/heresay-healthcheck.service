@@ -1,0 +1,8 @@
+# Daily disk + cert-expiry check. Triggered by heresay-healthcheck.timer; silent
+# unless something is actually wrong. See heresay-healthcheck.sh.
+[Unit]
+Description=Daily heresay host health check (disk, cert expiry)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/heresay-healthcheck.sh

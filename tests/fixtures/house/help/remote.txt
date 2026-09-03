@@ -1,0 +1,7 @@
+.remote — a private emote
+
+.remote <name> <text> is to .emote what .tell is to speech: an action
+delivered to one person. Wren sees: >> Corvid waves. You see your
+own line tagged with where it went: >> (to Wren) Corvid waves. .remote
+alone continues with your last correspondent if any. Otherwise
+everything else behaves like .tell. Shortcut: .r <

@@ -1,0 +1,39 @@
+@pause 2
+Shutting down talker daemon ...
+@pause 3
+SIGTERM sent to all sessions.
+@pause 2.5
+Flushing world state ... nothing to flush. Good.
+@pause 4
+Server going down NOW.
+@clear
+@sound power
+@pause 4.8
+@sound fan
+Meridian BIOS v4.86 (C) 1994 Halcyon Systems
+CPU: 80486DX2 at 66 MHz
+@pause 4
+@beep
+Memory Test:  640K OK
+@pause 3.2
+Memory Test: 8192K Extended OK
+@pause 2.4
+@sound hdd
+Detecting IDE drives ...
+@pause 4.8
+  Primary Master   : QUANTUM LP240A 540MB
+  Primary Slave    : none
+@pause 3.2
+@sound floppy
+Booting from C: ...
+@pause 6.4
+@sound hdd
+Starting MS-DOS...
+@pause 5.6
+C:\> CD HOUSE
+@pause 2.8
+C:\HOUSE> TALKER.EXE
+@pause 7.2
+@sound hdd
+@progress 14 REINITIALIZING WORLD STATE
+@pause 2

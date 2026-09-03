@@ -1,0 +1,7 @@
+name: lodge
+exits: gallery, orchard, concourse
+lockable: yes
+
+A small house of one room and a great many hooks. Boots by the door,
+kettle on, a chair drawn up close to the stove. Everything in it is the
+right size for somebody slightly smaller than you.

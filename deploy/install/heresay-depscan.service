@@ -1,0 +1,12 @@
+# Monthly CVE scan of the daemon's INSTALLED dependencies. Triggered by
+# heresay-depscan.timer; see heresay-depscan.sh for why a finding is a failed
+# unit rather than a mail.
+[Unit]
+Description=heresay dependency CVE scan
+# pip-audit fetches the advisory database, so don't start before the network.
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/heresay/deploy/bin/heresay-depscan.sh

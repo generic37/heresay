@@ -1,0 +1,14 @@
+# Follows events.jsonl and alerts on an auth-ceiling trip. Long-running, unlike
+# every other unit in this kit — hence Restart=always: a watcher that dies
+# silently is worse than no watcher, because you believe you are covered.
+[Unit]
+Description=Alert when the heresay auth-failure ceiling trips (events.jsonl)
+After=heresay.service
+
+[Service]
+ExecStart=/usr/local/bin/heresay-ceiling-watch.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

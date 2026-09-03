@@ -1,0 +1,6 @@
+.passwd — change your password
+
+Asks for the old, then the new twice, none of it echoed. There is
+no email and no reset link: your password and your .recovery codes
+are the whole of it. Change it when you doubt it, recover if you
+forget it.

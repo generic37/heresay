@@ -1,0 +1,38 @@
+# permissions.toml — who may run what.
+#
+# ⚠ THIS FILE IS A STARTING POINT, NOT A FULL TABLE. Any command it does not
+# name takes the engine's built-in default, in memory, and the house runs
+# exactly as if the line were here. Run `python -m heresay --write-permissions`
+# (as root, from the install directory) to have every command written out
+# explicitly with its current value — comments, ordering and your own edits are
+# preserved; only missing lines are appended.
+#
+# A value is a RANK NAME from `[ranks] order` in theme.toml. It means that rank
+# AND EVERYONE ABOVE IT.
+#
+# ⛔ The one other legal value is "disabled", and it does not mean "nobody may
+# run this". It means THE COMMAND DOES NOT EXIST IN THIS HOUSE: typing it gets
+# the same reply as typing nonsense, it is absent from `.help`, and no
+# permission check runs at all. It binds EVERYONE, the owner included — a value
+# that let the owner through would be a rank, not a disable. Nothing is
+# protected from it; if you disable `.passwd`, your house has no `.passwd`.
+#
+# Edits apply LIVE — the daemon notices within a few seconds and reloads. A file
+# it cannot read is rejected and the running table is kept, so a typo cannot
+# close a house that is already open. `.load_report` shows what changed.
+
+[commands]
+
+# ⛔ `.reboot` ships DISABLED, so a fresh house OPTS IN rather than discovering
+# it. It is a joke command — a staged 486-era boot sequence, shown only to
+# whoever typed it, that changes nothing — and it is very funny in a house whose
+# regulars are in on it and merely baffling in one where they are not. Its help
+# page is still installed; delete this line (or give it a rank) and it is back.
+#
+# ⚠ The `# system` heading is not decoration: `--write-permissions` files each
+# command under the section its registry category names, so writing the rest of
+# the table out later lands `.version`, `.source` and `.reboot`'s neighbours
+# right here rather than in a block at the end.
+
+# system
+reboot = "disabled"

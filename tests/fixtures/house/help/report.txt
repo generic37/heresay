@@ -1,0 +1,25 @@
+.report — tell the house about someone
+
+.report <name> <what happened> files a one-line report; .report
+<name> alone opens the editor for a longer one (.end files it,
+.abort discards). It works exactly like .mail, with one difference:
+the message does not go to <name>. It goes to the report box, and
+<name> is what it is about.
+
+You cannot report yourself. Reports are held encrypted, like mail,
+and are read only by whoever this house has given .read_report to —
+by default the owner, so that a report about staff does not land
+in front of staff.
+
+Your report is signed. Whoever reads it sees your name beside it,
+and the name of the person you reported. That is on purpose: a
+report nobody can attribute is an accusation with no one behind it,
+and it cannot be followed up or weighed.
+
+Nobody ELSE is told — not the room, and not the person you named.
+What you wrote is not logged, and neither name is written down
+anywhere in the clear; both are held encrypted with the report.
+
+If someone who can read reports is online, they are told at once
+that a report has arrived — never what it says. Otherwise they see
+it at their next login.

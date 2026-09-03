@@ -1,0 +1,7 @@
+.ungag — give the voice back (staff)
+
+  .ungag <name>   they can speak again
+
+The room is told, as it was when the gag went on. A gag is session-scoped
+anyway, so this is for ending one early rather than for cleaning up after a
+relog. Logged as a fact.

@@ -1,0 +1,14 @@
+.join — accept an invitation
+
+.join on its own answers the invitation you are holding: you arrive
+at the inviter's side, wherever they are — through geography and
+locked doors alike. Your arrival is announced like any other.
+
+.join <name> does the same and names who you meant. The name must be
+the whole of theirs (case does not matter): a near miss is refused
+rather than guessed at, and your invitation is left where it is.
+
+You hold one invitation at a time — a new one replaces the last —
+so .join always means the most recent. It lapses after five minutes,
+or when the inviter moves on; if it has, .join says so and you stay
+put.

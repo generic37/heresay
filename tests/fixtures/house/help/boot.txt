@@ -1,0 +1,11 @@
+.boot — disconnect a session (staff)
+
+  .boot <name>            drop them, no reason given
+  .boot <name> <reason>   drop them and say why
+
+The account is untouched: they can reconnect at once. This is for a stuck
+or abusive session, and it is also the fix for "already connected" when a
+ghost session holds a name. Their usual logout line is shown to the world,
+so a boot reads like any other departure. Logged as a fact.
+
+To keep someone OUT rather than merely off, use .ban.

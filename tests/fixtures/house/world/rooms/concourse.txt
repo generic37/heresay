@@ -1,0 +1,8 @@
+name: concourse
+exits: shore, rotunda, plaza, cabin, hall, lawn, refectory, thicket
+exits: orchard, den, overlook, gallery, glade, grotto, spring, atrium
+exits: lodge, stall, parlour, mirror_hall, oak, rampart, copse
+
+A long curved corridor with a door to everywhere, each one labelled in a
+small neat hand. It is not a room anybody stays in. It is the room you pass
+through on the way to the one you meant.

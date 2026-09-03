@@ -1,0 +1,91 @@
+# theme.toml — the house's WORDS: the RANK LADDER, the four LEVELS'
+# display names, and the browser tab's icon. Operator-editable, loaded at
+# startup, reloaded live when you save it.
+#
+# Delete this file entirely and the built-in GENERIC defaults apply. A missing
+# or malformed file is never fatal — it falls back and says so in `.load_report`.
+#
+# ⚠ The house's NAME is not here. `instance_name` is in config.toml, with the
+# rest of what an install decides, so that configuring a house is one file; a
+# line for it left in this file is IGNORED and warned about at startup.
+
+# The browser tab's icon: a path relative to house_dir (.svg/.png/.ico), or
+# absent for none. It lives HERE rather than in config.toml because it is
+# BRANDING — it belongs beside the house's name — and because house/ deploys
+# with the code, so changing it never needs an /etc edit. The server reads it
+# once at startup and hands the browser the BYTES as a data: URL, so the page
+# still makes no external request. Missing or unreadable -> a warning and a
+# blank icon; never fatal.
+favicon = "favicon.svg"
+
+[ranks]
+# THE LADDER, lowest rank first. A rank's name is its identity AND the word
+# people see for that rung (in `.promote`/`.demote`/`.accounts`/`.examine`), and
+# accounts.json stores that name. Add a rung by adding a name — the permission
+# thresholds follow with no code change:
+#
+#     order = ["novice", "resident", "steward", "owner"]
+#
+# Two things to know before renaming one. Renaming a rank does NOT move the
+# people in it: a name the ladder no longer knows is read as the bottom, and the
+# server counts them at startup and says so. And a rank may not share a name
+# with an account — that refuses to start, because a rank word is an identity
+# here (every rank name is reserved from registration, and the shared staff
+# letterbox is addressed to the rank).
+#
+# ⚠ `permissions.toml` values are RANK NAMES from this list, and nothing else.
+# Rename a rank and you edit that file in the same restart.
+order    = ["resident", "staff", "owner"]
+
+# The lowest rank that counts as STAFF: locked-door passage, staff-only rooms,
+# the shared letterbox, and who `.call_staff` pages. Everything at or above it
+# is staff. A value naming no rank makes only the TOP rank staff — restrictive,
+# and never a startup error.
+staff    = "staff"
+
+# The lowest ESTABLISHED rank, if you want a probationary rung below it. Left
+# unset it is order[0], which is what collapses the newb band to nothing and is
+# almost certainly what you want to start with.
+# resident = "resident"
+
+# ---------------------------------------------------------------------------
+# The four LEVELS' DISPLAY names
+# ---------------------------------------------------------------------------
+#
+# These are the words the ENGINE prints when it talks about a CLASS of people:
+# "call the staff", "staff mail", "the owner of this house". There are exactly
+# four levels — newb < resident < staff < owner — and they never change in
+# number or order, whatever your ladder looks like.
+#
+# ⚠ A LEVEL is not a RANK. `[ranks] order` above is the ladder people climb, and
+# a rank's name is the word shown for one person's rung (".promote" says so). A
+# level is the BAND a rank falls into, and its display name is what the engine
+# says about the band. A house can have five ranks and still exactly four
+# levels.
+#
+# ⚠ Singular and plural are separate fields because English plurals are
+# irregular: `staff` is both, `warden` is `wardens`, `the watch` is `the watch`.
+# A level with nothing set falls back to the name of the rank that anchors it,
+# and pluralises that naively by adding an "s".
+#
+# All four are written out here even though every one of them matches the
+# built-in default — the mechanism is otherwise invisible until something reads
+# wrong on your screen, and by then it is a puzzle rather than a setting. Change
+# a word and the whole house says it: a house whose staff are wardens sets
+# [levels.staff] singular = "warden", plural = "wardens".
+
+[levels.newb]
+singular = "newb"
+plural   = "newbs"
+
+[levels.resident]
+singular = "resident"
+plural   = "residents"
+
+[levels.staff]
+singular = "staff"
+plural   = "staff"          # NOTE: "staff", not "staffs" — hence its own field
+
+[levels.owner]
+singular = "owner"
+plural   = "owners"

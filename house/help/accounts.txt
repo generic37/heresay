@@ -1,0 +1,7 @@
+.accounts — list every account (owner)
+
+  .accounts   name, rank, and creation date, framed
+
+Every account the house knows, whether or not they are online — .who is the
+live version. It shows FACTS about accounts and never their contents: no
+descriptions, no profiles, and above all no mail.

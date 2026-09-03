@@ -1,0 +1,6 @@
+name: rotunda
+exits: rampart, mirror_hall, concourse
+
+A round room with no corners to argue in, which has not stopped anybody.
+The floor is a circle worn smooth by people walking round it while
+disagreeing, and the acoustics are unforgiving.

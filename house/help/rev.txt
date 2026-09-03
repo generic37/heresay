@@ -1,0 +1,12 @@
+.rev — what the room still remembers of the last half hour
+
+Says and emotes only; thinks, shouts, tells and notices are not kept.
+Works only while standing in the entry room; oldest first.
+
+It replays the room as you would have seen it live: people you have
+.muted are left out, and so is anything you have .ignored — if the
+room's murmurs are off for you, they stay off in the replay.
+
+Never on disk; a restart empties it, an empty room does not. Side
+rooms remember nothing — for privacy from later arrivals, speak
+somewhere other than the entry room.

@@ -1,0 +1,1502 @@
+<!doctype html>
+<!-- Copyright (C) 2026 BigPoetry -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- interactive-widget=resizes-content (v1.44.1): the on-screen keyboard must
+     shrink the LAYOUT viewport, not just the visual one. Android's default is
+     resizes-visual, under which `100dvh` stays full-height while the keyboard
+     covers the bottom of it — so the bottom-pinned input sat above the keyboard
+     with a gap of dead page between them (Edge on a Pixel, worst of the lot).
+     Chrome/Edge 108+ on Android honour this; ⚠ iOS/WebKit IGNORES it and stays
+     resizes-visual, which is why the off-by-default VisualViewport fallback in
+     the script below STAYS — this fixes the Android path that fallback was
+     awkwardly for, and does not replace it. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<!-- Pre-connect only, and DELIBERATELY neutral: naming the engine here made a
+     returning visitor's tab read "Heresay" for as long as the socket took to
+     open, then snap to the house's name. Anyone who has connected before now
+     gets their house name from localStorage before this ever shows (see
+     TITLE_CACHE below); this is the first-ever-visit placeholder, and it is
+     honest — the page really is connecting. The \x01title frame replaces it. -->
+<title>Connecting…</title>
+<!-- Empty icon: prevents a stray /favicon.ico request. No favicon machinery. -->
+<link rel="icon" href="data:,">
+<style>
+  /* One self-hosted font. No CDN, no external request of any kind. */
+  @font-face {
+    font-family: "IBM Plex Mono";
+    src: url("IBMPlexMono-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  :root {
+    /* Default theme: true dark, slightly warm off-white text. */
+    --bg: #0a0a0a;
+    --fg: #e8e2d4;
+    --dim: #6f6a5f;
+  }
+  :root[data-theme="green"] {
+    --bg: #020d02;
+    --fg: #33ff5e;
+    --dim: #1c7a33;
+  }
+  :root[data-theme="amber"] {
+    --bg: #0d0800;
+    --fg: #ffb000;
+    --dim: #8a5f00;
+  }
+
+  * { box-sizing: border-box; }
+
+  /* ⚠ THE FULL-HEIGHT LAYOUT, and on a phone the two lines below are not the
+     same line twice.
+
+     `height: 100%` on <html> resolves against the initial containing block,
+     which on mobile Blink is the LARGE viewport — the page as it would be with
+     the browser's toolbar hidden. That is exactly what `100vh` means, and it is
+     why the page was taller than what you could see: the flex column ran on
+     behind the toolbar and under the on-screen keyboard, leaving dead space
+     below the input line (worst in Edge, which subtracts the least chrome).
+
+     `dvh` is the DYNAMIC viewport: the area actually visible right now, tracked
+     live as the toolbar slides away and the keyboard comes and goes. The bar is
+     a flex child of body, so sizing body correctly is the whole fix — nothing
+     is positioned by hand.
+
+     Two declarations, in this order, on purpose: a browser too old to know
+     `dvh` drops the second and keeps the first, which is precisely the
+     behaviour that shipped before this change. The fallback is `100%` rather
+     than `100vh` because they are equivalent here (both resolve to the large
+     viewport) and `100%` is the value that has been proven in the field. */
+  html, body {
+    height: 100%;
+    height: 100dvh;
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    font-family: "IBM Plex Mono", ui-monospace, "SFMono-Regular", "Menlo",
+                 "Consolas", "Liberation Mono", monospace;
+    font-size: 15px;
+    line-height: 1.35;
+    /* Keep glyphs crisp — no forced smoothing. */
+    -webkit-font-smoothing: auto;
+    text-rendering: optimizeSpeed;
+    /* `.raise_prompt` lifts the WHOLE STACK, and it has to be HERE rather than on
+       the input bar. Padding on #bar only made the BAR taller: the flex column is
+       still exactly one viewport high, so the bar grew downward over the fold and
+       the output was never reflowed above it — the last output line and the line
+       you were typing both ended up in the covered strip.
+       On body it shrinks the CONTENT BOX instead (`box-sizing: border-box` +
+       `height: 100%`, so height INCLUDES this padding), which is what makes both
+       flex children — the scrolling output AND the bar — sit that many lines up
+       with genuinely empty space beneath. --raise-lines is a unitless line count;
+       1.35em is the body's own line-height, so one step is exactly one line of
+       text and nothing has to be measured in JS.
+       The safe-area inset lives here too, so the bar does not add it a second
+       time. */
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px)
+                         + (var(--raise-lines, 0) * 1.35em));
+  }
+
+  /* The screen: room text, edge to edge. Nothing else. */
+  #screen {
+    flex: 1 1 auto;
+    min-height: 0;            /* allow it to shrink when the compose box grows */
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 10px 12px 4px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .line { min-height: 1.35em; }
+
+  /* The compose bar, fixed at the bottom. The textarea auto-grows upward (the
+     screen shrinks); no button, no chrome beyond the input's own. */
+  #bar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: flex-start;   /* sigil aligns to the first line of the textarea */
+    /* Plain breathing room only. The raise and the safe-area inset are on body
+       (above) — putting either here grows the bar instead of moving it. */
+    padding: 6px 12px 10px;
+    gap: 8px;
+  }
+  #sigil { color: var(--dim); user-select: none; line-height: 1.35; }
+  #input, #mask {
+    flex: 1 1 auto;
+    min-width: 0;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    color: var(--fg);
+    font: inherit;
+    line-height: 1.35;
+    padding: 0;
+    margin: 0;
+    caret-color: var(--fg);
+  }
+  #input {
+    display: block;
+    resize: none;
+    overflow-y: hidden;       /* grows instead of scrolling (hard-capped at 6 rows) */
+    min-height: 1.35em;
+  }
+  /* The masked field does not EXIST until a prompt asks for one. Not merely
+     blank: no box, nothing to click, nothing to focus, no empty selection.
+     display:none is the default here — a rule, not just the hidden attribute —
+     and only dropping [hidden] brings it back. */
+  #mask { display: none; min-height: 1.35em; }
+  #mask:not([hidden]) { display: block; }
+  [hidden] { display: none !important; }
+  /* Chromium paints an autofilled field with its own near-white background and
+     dark text through an internal pseudo-class that an ordinary `background`
+     rule cannot override — which is what turned the password prompt into a
+     white strip. A huge inset shadow is the one thing that does override it;
+     the absurd transition delay defeats the fade-in it applies on top. */
+  /* Two rules, not one selector list: an unknown pseudo-class invalidates the
+     WHOLE list it appears in, so pairing them would lose both in any browser
+     that knows only one. */
+  #mask:-webkit-autofill,
+  #mask:-webkit-autofill:hover,
+  #mask:-webkit-autofill:focus,
+  #mask:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px var(--bg) inset !important;
+    box-shadow: 0 0 0 1000px var(--bg) inset !important;
+    -webkit-text-fill-color: var(--fg) !important;
+    caret-color: var(--fg) !important;
+    transition: background-color 100000s ease-in-out 0s;
+  }
+  #mask:autofill {
+    -webkit-box-shadow: 0 0 0 1000px var(--bg) inset !important;
+    box-shadow: 0 0 0 1000px var(--bg) inset !important;
+    -webkit-text-fill-color: var(--fg) !important;
+    caret-color: var(--fg) !important;
+    transition: background-color 100000s ease-in-out 0s;
+  }
+  /* Hide the native reveal/clear controls some browsers add. */
+  #input::-ms-reveal, #input::-ms-clear,
+  #mask::-ms-reveal, #mask::-ms-clear { display: none; }
+</style>
+</head>
+<body>
+  <div id="screen" aria-live="polite"></div>
+  <div id="bar"><span id="sigil">&gt;</span><textarea
+      id="input" rows="1" autocomplete="off" autocapitalize="off" autocorrect="off"
+      spellcheck="false" aria-label="Heresay input" autofocus></textarea><input
+      id="mask" type="text" autocomplete="off" autocapitalize="off"
+      autocorrect="off" spellcheck="false" aria-label="Heresay password" hidden></div>
+  <!-- NOT type="password", deliberately. Chromium's password manager matches by
+       registrable domain, so a credential saved for domain.example is offered on
+       your.domain.example the moment a password field takes focus — and
+       that suggestion popup is browser chrome no page CSS or attribute can
+       suppress. The only way to not be offered a credential is to not be a
+       credential field. So this is a plain text input that never holds the
+       secret: the real characters live in a JS buffer and the field shows only
+       dots (see maskBuf below). Still bare besides — no <form>, no name — and
+       autocomplete="off", which browsers DO honour on a non-password field. -->
+
+<script>
+(() => {
+  "use strict";
+
+  const screenEl = document.getElementById("screen");
+  const inputEl = document.getElementById("input");   // the compose <textarea>
+  const maskEl = document.getElementById("mask");     // masked <input> for passwords
+  const MAX_LINES = 500;          // scrollback cap
+  const COMPOSE_MAX_LINES = 6;    // compose box hard cap (visual rows); beyond it,
+                                  // input is refused with a beep — not a scroll point
+  const CONTROL = "\x01";
+  // The longest line we will put on the wire. Matches the server's
+  // MAX_LINE_LENGTH, which truncates to exactly this anyway — so this changes
+  // nothing anyone can observe, and that is the point.
+  //
+  // ⛔ It exists because the server bounds the FRAME at 8 KB (v1.49.0, audit
+  // A2), and an over-size frame is a protocol violation: the WebSocket layer
+  // closes the connection with 1009, it does not truncate. Without this cap a
+  // 60 KB paste — an ordinary thing a person does — would drop them out of the
+  // world, where today it is quietly trimmed. Truncating here keeps the old
+  // behaviour and leaves the wire bound for clients that are not this one.
+  const MAX_SEND = 1024;
+
+  // ---- sound: synthesized 486 hardware cues (.reboot ONLY) ---------------
+  //
+  // Covenant (amended): the web door plays sound ONLY as the immediate, direct
+  // result of the user's OWN command — here, the `\x01sound <name>` control
+  // frames a `.reboot` THEY typed produces (plus `\x07` from @beep). Never from
+  // another person's activity, never from a system event, never anything that
+  // could summon attention. All synthesis is local: no files, no network.
+  //
+  // TUNING: everything audible is a named constant in SOUND below. Edit a value,
+  // save, refresh the browser — no rebuild. `masterGain` is the overall volume.
+  const SOUND = {
+    masterGain: 0.18,          // overall loudness, 0..1 (modest by default)
+    power: {                   // low relay *thunk*: a filtered click + sine drop
+      clickDur:   0.05,        // s   — the initial contact click
+      clickHz:    1200,        // Hz  — highpass corner for that click
+      thunkHz:    90,          // Hz  — where the low sine body starts
+      thunkEndHz: 32,          // Hz  — where it settles as it drops
+      thunkDur:   0.22,        // s   — length of the drop
+      gain:       0.9,
+    },
+    fan: {                     // spin-up -> steady hum ~the sequence -> fade
+      swellDur:  1.4,          // s   — noise swelling from low to full speed
+      holdDur:   12.0,         // s   — faint steady hum (about the boot length)
+      fadeDur:   2.0,          // s   — fade back to silence
+      lowpassHz: 320,          // Hz  — muffles the noise into airy hum
+      gain:      0.10,
+    },
+    hdd: {                     // the grind: band-passed noise + seek chatter
+      minDur:    1.5, maxDur: 3.0,   // s — randomized grind length
+      bandHz:    2100,         // Hz  — band-pass centre of the grind
+      bandQ:     0.9,
+      grindGain: 0.06,
+      clickGain: 0.5,          // seek-chatter click loudness
+      clickMinGap: 0.05, clickMaxGap: 0.22,   // s — irregular click spacing
+    },
+    floppy: {                  // two-three slow mechanical clunk-clicks
+      clunks: 3,
+      gap:    0.18,            // s   — between clunks
+      hz:     140,             // Hz  — low thud pitch
+      dur:    0.06,            // s   — each clunk body
+      gain:   0.7,
+    },
+    beep: {                    // the POST beep
+      hz:   880,               // Hz
+      dur:  0.14,              // s
+      gain: 0.35,
+      type: "square",
+    },
+    clickHz: 2500,             // Hz — highpass corner shared by all tick/clicks
+  };
+
+  // @progress bar (.reboot). Rendered in-place in the terminal — same monospace,
+  // no external anything. TUNING: width = cells; fill/empty chars. Mirror `width`
+  // to reboot.PROGRESS_CELLS so the socket and web bars are the same length.
+  const PROGRESS = {
+    width: 20,                 // cells: LABEL [####################]
+    fillChar: "#",
+    emptyChar: "-",
+  };
+
+  // ---- background-tab activity indicator ---------------------------------
+  //
+  // When the tab is NOT active and a line arrives from the room, mark the
+  // browser tab: blink the title and swap the favicon for a filled dot. Both
+  // clear the instant the tab is active again.
+  //
+  // Covenant: this is NOT engagement machinery. It never fires while you are
+  // looking at the tab, it says only "something happened" and never what or who,
+  // it is a passive mark on a tab you already have open, and it evaporates the
+  // moment you look. No notification, no badge count, no sound. (The `\x01sound`
+  // machinery above COULD be tied in here — deliberately is not, because a noise
+  // from another person's activity is exactly what the covenant rules out.)
+  //
+  // TUNING: set `enabled: false` to switch the whole thing off. Everything is
+  // drawn locally on a <canvas>; no file, no network — the zero-external-requests
+  // rule holds.
+  const TAB_ALERT = {
+    enabled: true,             // the one switch: false = no title blink, no dot
+    // ms each state is shown. 1000 ON PURPOSE, not "about a second": a HIDDEN
+    // tab has its timers clamped to roughly 1/s and aligned to that tick, so a
+    // period that is not a clean multiple of the clamp beats against it — 1200
+    // was served as ~1000/2000/1000/2000, which is exactly the "flash, then a
+    // long stall" this was reported as. At 1000 every wake lands on a state
+    // change: a steady 1s on, 1s off. Do not lower it hoping for a faster
+    // blink; a sub-second period is coalesced into stutter, and a slow even
+    // rhythm reads far better than a fast ragged one.
+    blinkMs: 1000,
+    marker: "● ",              // prefix on the blinked title ("● Commons")
+    dotColor: "#e8503a",       // the favicon dot
+    dotSize: 32,               // px — canvas edge (favicons are tiny; 32 is plenty)
+  };
+
+  // ---- .raise_prompt: lift the input line off the bottom edge -------------
+  //
+  // A browser-local nudge, in whole LINES, for the case the compose bar loses:
+  // an auto-hidden Windows taskbar reserves no space, so the window fills to the
+  // true bottom edge — and the taskbar then slides up over the line you are
+  // typing into. Nothing server-side can know that; it is a property of the
+  // machine looking at the page. So it is a client command like `.theme`, saved
+  // per browser, and never sent to the server.
+  //
+  // TUNING: `max` is the ceiling in lines; `autoLines` is the first-load default
+  // when the heuristic says the window reaches the true bottom (initialRaise()).
+  const RAISE = {
+    key: "heresay-raise",      // localStorage key (beside heresay-theme)
+    max: 10,                   // lines; a sane ceiling, not a limit anyone hits
+    autoLines: 1,              // first-load default when the edge looks flush
+    edgeSlackPx: 10,           // screen.height - availHeight below this = flush
+  };
+
+  // ---- VisualViewport height sync — OFF, and a fallback only --------------
+  //
+  // WHAT IT IS FOR. The `100dvh` layout (see the CSS at the top) is the fix for
+  // the whitespace a phone used to leave below the input line, and on Blink it
+  // should be the whole of it. This is the belt to that braces: a browser can
+  // still be a little wrong about its own dynamic viewport — Edge has been the
+  // one to watch — and if a sliver of dead space survives the swap, this closes
+  // it by measuring instead of trusting.
+  //
+  // HOW TO TURN IT ON. Set `enabled: true` below and reload. Nothing else.
+  //
+  // WHAT IT DOES. Writes window.visualViewport's height onto <html> and <body>
+  // as an inline pixel height whenever the visual viewport resizes or scrolls
+  // (the keyboard opening, the toolbar sliding). An inline style beats the
+  // stylesheet, so the measured height wins over `100dvh` while it is on and
+  // nothing at all happens while it is off.
+  //
+  // ⛔ LAYOUT ONLY. It must never touch the scroll position: snapping to the
+  // newest line belongs to submitCompose/addLine and is not this block's
+  // business. Do not "helpfully" call pinToBottom() from here — a keyboard
+  // opening is not a message arriving, and yanking the view to the bottom while
+  // someone is reading back is the bug this page has always avoided.
+  const VIEWPORT = {
+    enabled: false,            // <- the one switch; see above
+  };
+
+  let audioCtx = null;         // lazily created on the first cue (see audio())
+  function audio() {
+    // Browsers require a user gesture before audio may start; typing ".reboot"
+    // and pressing Enter is that gesture. Created once, on the first cue.
+    if (audioCtx === null) {
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch (e) { audioCtx = false; }     // false = unavailable -> cues no-op
+    }
+    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+    return audioCtx || null;
+  }
+  function noiseBuffer(ctx, seconds) {
+    const n = Math.max(1, Math.floor(ctx.sampleRate * seconds));
+    const buf = ctx.createBuffer(1, n, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    return buf;
+  }
+  function master(ctx) {
+    const g = ctx.createGain();
+    g.gain.value = SOUND.masterGain;
+    g.connect(ctx.destination);
+    return g;
+  }
+  function clickAt(ctx, out, when, gain) {
+    // A dry mechanical tick: a very short highpassed noise burst.
+    const dur = 0.012;
+    const src = ctx.createBufferSource();
+    src.buffer = noiseBuffer(ctx, dur);
+    const hp = ctx.createBiquadFilter();
+    hp.type = "highpass"; hp.frequency.value = SOUND.clickHz;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(Math.max(gain, 0.0001), when);
+    g.gain.exponentialRampToValueAtTime(0.001, when + dur);
+    src.connect(hp).connect(g).connect(out);
+    src.start(when); src.stop(when + dur);
+  }
+  function playPower(ctx) {
+    const t = ctx.currentTime, P = SOUND.power, out = master(ctx);
+    clickAt(ctx, out, t, P.gain);              // contact click
+    const osc = ctx.createOscillator();        // low sine drop = the thunk body
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(P.thunkHz, t);
+    osc.frequency.exponentialRampToValueAtTime(P.thunkEndHz, t + P.thunkDur);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(P.gain, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + P.thunkDur);
+    osc.connect(g).connect(out);
+    osc.start(t); osc.stop(t + P.thunkDur);
+  }
+  function playFan(ctx) {
+    const t = ctx.currentTime, F = SOUND.fan, out = master(ctx);
+    const total = F.swellDur + F.holdDur + F.fadeDur;
+    const src = ctx.createBufferSource();
+    src.buffer = noiseBuffer(ctx, total);
+    const lp = ctx.createBiquadFilter();
+    lp.type = "lowpass"; lp.frequency.value = F.lowpassHz;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(F.gain, t + F.swellDur);
+    g.gain.setValueAtTime(F.gain, t + F.swellDur + F.holdDur);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + total);
+    src.connect(lp).connect(g).connect(out);
+    src.start(t); src.stop(t + total);
+  }
+  function playHdd(ctx) {
+    const t = ctx.currentTime, H = SOUND.hdd, out = master(ctx);
+    const dur = H.minDur + Math.random() * (H.maxDur - H.minDur);
+    const src = ctx.createBufferSource();      // band-passed noise = the grind
+    src.buffer = noiseBuffer(ctx, dur);
+    const bp = ctx.createBiquadFilter();
+    bp.type = "bandpass"; bp.frequency.value = H.bandHz; bp.Q.value = H.bandQ;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(H.grindGain, t + 0.05);
+    let tt = t + 0.05;                          // wobble the level as it grinds
+    while (tt < t + dur - 0.1) {
+      g.gain.linearRampToValueAtTime(H.grindGain * (0.4 + Math.random() * 0.6), tt);
+      tt += 0.06 + Math.random() * 0.08;
+    }
+    g.gain.linearRampToValueAtTime(0.0001, t + dur);
+    src.connect(bp).connect(g).connect(out);
+    src.start(t); src.stop(t + dur);
+    let ct = t + 0.1;                           // irregular seek-chatter clicks
+    while (ct < t + dur - 0.05) {
+      clickAt(ctx, out, ct, H.clickGain);
+      ct += H.clickMinGap + Math.random() * (H.clickMaxGap - H.clickMinGap);
+    }
+  }
+  function playFloppy(ctx) {
+    const t = ctx.currentTime, Fl = SOUND.floppy, out = master(ctx);
+    for (let i = 0; i < Fl.clunks; i++) {
+      const when = t + i * Fl.gap;
+      const osc = ctx.createOscillator();       // low thud
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(Fl.hz, when);
+      osc.frequency.exponentialRampToValueAtTime(Fl.hz * 0.5, when + Fl.dur);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(Fl.gain, when);
+      g.gain.exponentialRampToValueAtTime(0.001, when + Fl.dur);
+      osc.connect(g).connect(out);
+      osc.start(when); osc.stop(when + Fl.dur);
+      clickAt(ctx, out, when, 0.3);             // the head clunk
+    }
+  }
+  function playBeep(ctx) {
+    const t = ctx.currentTime, B = SOUND.beep, out = master(ctx);
+    const osc = ctx.createOscillator();
+    osc.type = B.type; osc.frequency.value = B.hz;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(B.gain, t + 0.01);
+    g.gain.setValueAtTime(B.gain, t + Math.max(B.dur - 0.02, 0.02));
+    g.gain.exponentialRampToValueAtTime(0.001, t + B.dur);
+    osc.connect(g).connect(out);
+    osc.start(t); osc.stop(t + B.dur);
+  }
+  function playSound(name) {
+    const ctx = audio();
+    if (!ctx) return;
+    switch (name) {
+      case "power":  return playPower(ctx);
+      case "fan":    return playFan(ctx);
+      case "hdd":    return playHdd(ctx);
+      case "floppy": return playFloppy(ctx);
+      case "beep":   return playBeep(ctx);
+      default:       return;   // unknown cue: no-op (forward-compatible)
+    }
+  }
+
+  // ---- localStorage key migration (talker-* -> heresay-*) ----------------
+  //
+  // The four persisted keys were renamed from `talker-*` to `heresay-*` when the
+  // engine's name became its identity. A returning visitor must NOT lose their
+  // saved theme, tab title, prompt height, or remembered login — so on first load
+  // after the rename, copy each old value across to its new key if the new key is
+  // absent. This MUST run before anything below reads any of those keys (theme
+  // just below, title/raise/resume further down), because every one of them reads
+  // its key exactly ONCE: if the read happens before the copy, the migrated value
+  // is never seen. The old keys are removed after copying so this is a one-time,
+  // idempotent pass (a second load finds the new key present and does nothing).
+  try {
+    const MIGRATIONS = [
+      ["heresay-theme", "talker-theme"],
+      ["heresay-title", "talker-title"],
+      ["heresay-raise", "talker-raise"],
+      ["heresay-resume", "talker-resume"],
+    ];
+    for (const [newKey, oldKey] of MIGRATIONS) {
+      const old = localStorage.getItem(oldKey);
+      if (old !== null && localStorage.getItem(newKey) === null) {
+        localStorage.setItem(newKey, old);
+      }
+      if (old !== null) localStorage.removeItem(oldKey);
+    }
+  } catch (e) { /* private mode / storage off: nothing to migrate */ }
+
+  // ---- theme (a client-side preference, never conversation) --------------
+  const THEMES = ["default", "green", "amber"];
+  function applyTheme(name) {
+    if (!THEMES.includes(name)) return false;
+    if (name === "default") document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.setAttribute("data-theme", name);
+    try { localStorage.setItem("heresay-theme", name); } catch (e) {}
+    return true;
+  }
+  try {
+    const saved = localStorage.getItem("heresay-theme");
+    if (saved) applyTheme(saved);
+  } catch (e) {}
+
+  // ---- the house's name, cached for the next visit ------------------------
+  //
+  // The server pushes `\x01title <instance_name>` on connect, which is the
+  // authority — but it cannot arrive until the socket is open, so a returning
+  // visitor watched the placeholder for a beat and then a snap to "Commons".
+  // Remembering the last name we were told lets the tab be right from the first
+  // paint. Purely cosmetic: the frame still overwrites it every connect, so a
+  // renamed house corrects itself on the next connect, not on a cache flush.
+  //
+  // Applied HERE, before the tab-mark block reads document.title into
+  // `normalTitle` — so a blink that somehow fires before the frame arrives still
+  // alternates the house's name, never the placeholder.
+  const TITLE_CACHE = "heresay-title";     // beside heresay-theme / heresay-raise
+
+  function rememberTitle(name) {
+    try { localStorage.setItem(TITLE_CACHE, name); } catch (e) {}
+  }
+
+  try {
+    const cached = localStorage.getItem(TITLE_CACHE);
+    if (cached && cached.trim()) document.title = cached.trim();
+  } catch (e) {}
+
+  // ---- .raise_prompt (a client-side preference, never conversation) -------
+  //
+  // Same shape as the theme above: applied to the DOM, saved in localStorage,
+  // intercepted before send. See the RAISE block at the top for the tunables.
+
+  let raiseLines = 0;
+  // The HOUSE's clamp, pushed as a `\x01raise_bounds <min> <max>` frame on
+  // connect and whenever a owner retunes it. Until that frame arrives (or
+  // against an older server that never sends one) the built-in RAISE values
+  // stand, so the command works from the first keystroke either way.
+  let raiseMin = 0;
+  let raiseMax = RAISE.max;
+
+  function applyRaise(n, persist) {
+    // Clamped both ends by the HOUSE's bounds: the floor is not always 0 (a
+    // house can require some clearance) and the ceiling is not always 10.
+    n = Math.max(raiseMin, Math.min(raiseMax, Math.round(n) || 0));
+    raiseLines = n;
+    try {
+      document.documentElement.style.setProperty("--raise-lines", String(n));
+    } catch (e) {}
+    if (persist) {
+      try { localStorage.setItem(RAISE.key, String(n)); } catch (e) {}
+    }
+    // Changing the offset changes the OUTPUT REGION's height, and a shrinking
+    // scroll box strands its scroll position: the newest line ends up above the
+    // fold, which reads exactly like the bug this fix is for. Re-pin to the
+    // bottom after layout has settled, so the last line is where it belongs —
+    // just above the input.
+    pinToBottom();
+    return n;
+  }
+
+  function initialRaise() {
+    // A SAVED value always wins — including a saved 0, which is a person having
+    // deliberately turned the nudge off and must not be re-guessed every load.
+    try {
+      const saved = localStorage.getItem(RAISE.key);
+      if (saved !== null && saved !== "") {
+        const n = parseInt(saved, 10);
+        if (isFinite(n)) return n;
+      }
+    } catch (e) {}
+    // First load only: guess. A docked taskbar RESERVES screen space, so
+    // height - availHeight is large and the window already stops short of the
+    // edge — nothing to clear, start at 0. An auto-hidden (or absent) one
+    // reserves nothing, the window fills to the true bottom, and the bar will
+    // slide up over the input — so start one line clear of it.
+    try {
+      const s = window.screen;
+      if (!s || typeof s.height !== "number" || typeof s.availHeight !== "number") {
+        return 0;                       // no way to tell: change nothing
+      }
+      const reserved = s.height - s.availHeight;
+      return reserved < RAISE.edgeSlackPx ? RAISE.autoLines : 0;
+    } catch (e) {
+      return 0;                         // never throw over a cosmetic default
+    }
+  }
+
+  const RAISE_USAGE =
+    "Usage: .raise_prompt <n> (set) | -<n> (lower by n) | 0 | bare to report";
+
+  function raiseReport(n) {
+    if (n === 0) return "Input at the bottom edge.";
+    return "Input raised " + n + " line" + (n === 1 ? "" : "s") + ".";
+  }
+
+  function setRaiseBounds(lo, hi) {
+    // The house's word replaces the built-in fallback. If the new range leaves
+    // the current offset outside it, RE-CLAMP LIVE — a bound that only applied
+    // to future commands would leave the very setting it forbids on screen.
+    if (!isFinite(lo) || !isFinite(hi) || lo < 0 || hi < 0) return;
+    if (lo > hi) { const t = lo; lo = hi; hi = t; }
+    raiseMin = Math.round(lo);
+    raiseMax = Math.round(hi);
+    if (raiseLines < raiseMin || raiseLines > raiseMax) applyRaise(raiseLines, true);
+  }
+
+  function handleRaise(arg) {
+    // Signed numbers, and the sign carries the MEANING (v1.22.0):
+    //   POSITIVE n  -> set it to n         ("raise it that high" — absolute)
+    //   NEGATIVE n  -> lower by |n|        (relative, from where it is now)
+    //   0           -> the floor
+    // Absolute-up/relative-down reads oddly written down and is exactly right
+    // in use: you know how high you want it, and you nudge it back down a line
+    // at a time. `.raise_prompt 4` then `-1` leaves it at 3.
+    const a = (arg || "").trim();
+    if (a === "") return raiseReport(raiseLines);
+    if (!/^[+-]?\d+$/.test(a)) return RAISE_USAGE;
+    const n = parseInt(a, 10);
+    if (!isFinite(n)) return RAISE_USAGE;
+    const target = n < 0 ? raiseLines + n : n;      // negative = relative
+    return raiseReport(applyRaise(target, true));
+  }
+
+  // Apply the starting value at load: saved if there is one, else the guess.
+  // Persisted either way, so the guess is made ONCE and then owned by the user.
+  applyRaise(initialRaise(), true);
+
+  // The VisualViewport fallback (see the VIEWPORT block above). Off by default,
+  // feature-detected, and wrapped: with the flag false this is three comparisons
+  // at load and nothing else. Layout only — no scrolling, ever.
+  function syncViewportHeight() {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const px = Math.round(vv.height) + "px";
+    document.documentElement.style.height = px;
+    document.body.style.height = px;
+  }
+  if (VIEWPORT.enabled && window.visualViewport) {
+    try {
+      window.visualViewport.addEventListener("resize", syncViewportHeight);
+      window.visualViewport.addEventListener("scroll", syncViewportHeight);
+      syncViewportHeight();
+    } catch (e) {}
+  }
+
+  // ---- screen ------------------------------------------------------------
+  function pinToBottom() {
+    // After the next frame: the raise changes body's padding, and the height it
+    // costs #screen is not known until layout runs.
+    try {
+      requestAnimationFrame(() => {
+        try { screenEl.scrollTop = screenEl.scrollHeight; } catch (e) {}
+      });
+    } catch (e) {
+      try { screenEl.scrollTop = screenEl.scrollHeight; } catch (e2) {}
+    }
+  }
+
+  function atBottom() {
+    return screenEl.scrollHeight - screenEl.scrollTop - screenEl.clientHeight < 40;
+  }
+  function addLine(text) {
+    const stick = atBottom();
+    const div = document.createElement("div");
+    div.className = "line";
+    div.textContent = text;           // textContent: no HTML, no styling
+    screenEl.appendChild(div);
+    while (screenEl.childElementCount > MAX_LINES) {
+      screenEl.removeChild(screenEl.firstChild);   // ephemerality: drop old lines
+    }
+    if (stick) screenEl.scrollTop = screenEl.scrollHeight;
+  }
+  function clearScreen() {
+    screenEl.textContent = "";
+  }
+
+  // ---- background-tab activity indicator (see TAB_ALERT above) -----------
+  //
+  // Active means VISIBLE **and** FOCUSED — a tab you can see behind another
+  // window is not one you are reading. Everything here is feature-detected and
+  // wrapped: on a browser without the Page Visibility API it falls back to focus
+  // alone, and if a canvas favicon cannot be drawn it simply blinks the title.
+  // Nothing in this block may ever throw into the message path.
+
+  // `rel~="icon"` so a page written as `rel="shortcut icon"` is matched too.
+  const ICON_SELECTOR = 'link[rel~="icon"]';
+  // The NORMAL title and icon — what the tab shows when nothing is happening,
+  // and what the blink alternates away from and back to. Both are MUTABLE
+  // (v1.22.0): the server pushes the house's name and favicon on connect, which
+  // arrives AFTER load, so a value captured once at load would be the engine's
+  // placeholder and the blink would restore the wrong thing.
+  let normalTitle = document.title;
+  let normalIcon = (() => {
+    const el = document.querySelector(ICON_SELECTOR);
+    return el ? el.getAttribute("href") : null;
+  })();
+
+  let blinkTimer = null;       // the ONE interval; never two at once
+  let alertRaised = false;
+  let alertIcon = null;        // the dot, drawn once and reused
+  let iconSwapped = false;     // did we actually change the favicon? (canvas may fail)
+  // The RESIDENT's own choice, pushed by the server as a `\x01tab_alert on|off`
+  // frame at login and again whenever they change `.ignore tab_alert`. Two
+  // switches, and they are not the same thing: TAB_ALERT.enabled is the
+  // OPERATOR's master switch in the code, this is the PERSON's, stored on their
+  // account. The mark fires only when both say yes; `enabled: false` wins over
+  // everything, so an operator who has switched the feature off cannot have it
+  // turned back on from a session. Default on — a session that never receives
+  // the frame (an older server) behaves exactly as 1.18.0 did.
+  let tabAlertWanted = true;
+
+  // THREE switches now, not two (v1.25.1): the operator's TAB_ALERT.enabled, the
+  // resident's `.ignore tab_alert`, and this — whether the tab is holding a
+  // connected, in-world session at all.
+  //
+  // Without it the mark could blink at the greeting, at the name prompt, in the
+  // middle of typing a password, or over a dead socket. None of those are the
+  // room talking to you, and the covenant amendment's whole claim is that the
+  // mark means "something happened HERE" — a login prompt has no "here" yet.
+  //
+  // The server says so with `\x01inworld on`, sent once as a session enters the
+  // world by any route (fresh login, grace reattach, self-takeover, or a resume
+  // token straight in). It is never sent before that, so `false` is the honest
+  // default and an older server simply never marks — which is the safe way to be
+  // wrong.
+  let inWorld = false;
+
+  function setInWorld(on) {
+    inWorld = !!on;
+    // A blink must never outlive the session it belongs to. Dropping out of the
+    // world clears it NOW rather than at the next refocus.
+    if (!inWorld) clearAlert();
+  }
+  let windowFocused = (typeof document.hasFocus === "function")
+    ? document.hasFocus() : true;
+
+  function tabActive() {
+    // `document.hidden` is undefined on browsers without the Page Visibility
+    // API; treat those as visible and let focus decide.
+    const visible = (typeof document.hidden === "boolean") ? !document.hidden : true;
+    return visible && windowFocused;
+  }
+
+  function dotDataURL() {
+    // A filled dot on a transparent square, drawn locally. Cached: the canvas is
+    // touched once per page load, not once per blink.
+    if (alertIcon !== null) return alertIcon;
+    try {
+      const c = document.createElement("canvas");
+      if (!c.getContext) return null;
+      const n = TAB_ALERT.dotSize;
+      c.width = c.height = n;
+      const g = c.getContext("2d");
+      if (!g) return null;
+      g.beginPath();
+      g.arc(n / 2, n / 2, n * 0.4, 0, Math.PI * 2);
+      g.fillStyle = TAB_ALERT.dotColor;
+      g.fill();
+      alertIcon = c.toDataURL("image/png");
+      return alertIcon;
+    } catch (e) {
+      return null;             // no canvas, or a tainted/blocked toDataURL
+    }
+  }
+
+  function setFavicon(href) {
+    // REPLACE the <link>, never mutate its href — the v1.19.0 bug. Setting
+    // `href` on the existing element leaves the DOM correct while the browser
+    // goes on painting the old icon: most of them only re-read a favicon when a
+    // NEW link element is inserted, and are especially reluctant to repaint when
+    // the new value is a blank `data:,`. So the dot went up fine and never came
+    // down. Remove-and-append is the standard force-refresh, and it is the only
+    // reliable one.
+    //
+    // `href === null` means the page shipped no icon at all: then "restore" is
+    // to leave none rather than to insert an empty one.
+    try {
+      const head = document.head || document.getElementsByTagName("head")[0];
+      if (!head) return;
+      const old = document.querySelectorAll(ICON_SELECTOR);
+      for (let i = 0; i < old.length; i++) {
+        if (old[i].parentNode) old[i].parentNode.removeChild(old[i]);
+      }
+      if (href === null) return;
+      const link = document.createElement("link");
+      link.rel = "icon";
+      link.href = href;
+      head.appendChild(link);
+    } catch (e) {}          // never throw into the message path
+  }
+
+  function now() {
+    // Monotonic where available (a clock change must not jolt the blink), rampart
+    // clock otherwise. Feature-detected like everything else in this block.
+    try {
+      if (typeof performance === "object" && performance &&
+          typeof performance.now === "function") {
+        return performance.now();
+      }
+    } catch (e) {}
+    return Date.now();
+  }
+
+  function paintMark(marked) {
+    // ONE function paints BOTH halves of a blink frame, off ONE interval, so the
+    // title and the icon can never drift out of step.
+    document.title = marked ? TAB_ALERT.marker + normalTitle : normalTitle;
+    // v1.22.0: the FAVICON blinks too, and that is the point of the mark — a
+    // background tab is often narrow enough that the title text is invisible,
+    // so a blinking title alone signals nothing. The icon is the part you can
+    // actually see. Each frame goes through setFavicon(), which REPLACES the
+    // <link> — mutating href does not repaint (the v1.19.1 bug), and a blink is
+    // exactly a repaint every 1.2s.
+    const dot = dotDataURL();
+    if (dot === null) return;      // no canvas: the title still blinks, silently
+    setFavicon(marked ? dot : normalIcon);
+    iconSwapped = true;
+  }
+
+  function raiseAlert() {
+    if (!markAllowed() || alertRaised) return;
+    alertRaised = true;
+    // Mark at once, then alternate — the first frame is the signal, not the
+    // first tick. ONE interval, started here and cleared only by clearAlert():
+    // it is never restarted while raised, so the cadence cannot be reset by
+    // further activity.
+    //
+    // The state is derived from ELAPSED TIME, not from counting ticks. Under
+    // background-tab throttling a tick arrives LATE, and a tick-counting toggle
+    // would then show the wrong state for a whole period and stay out of phase
+    // for the rest of the run. Deriving it means a late tick paints the state
+    // that moment should be in — the rhythm self-corrects instead of drifting.
+    const startedAt = now();
+    paintMark(true);
+    blinkTimer = setInterval(() => {
+      const phase = Math.floor((now() - startedAt) / TAB_ALERT.blinkMs);
+      paintMark(phase % 2 === 0);
+    }, TAB_ALERT.blinkMs);
+  }
+
+  function clearAlert() {
+    if (blinkTimer !== null) { clearInterval(blinkTimer); blinkTimer = null; }
+    if (!alertRaised) return;
+    alertRaised = false;
+    document.title = normalTitle;             // restored exactly
+    // Recreate the NORMAL icon as a fresh element — the same force-refresh the
+    // blink uses. Only if we ever swapped it, so a no-canvas session never
+    // churns the DOM.
+    if (iconSwapped) { setFavicon(normalIcon); iconSwapped = false; }
+  }
+
+  // ---- what the house calls itself (pushed on connect) --------------------
+
+  function setHouseTitle(name) {
+    // The tab should say the HOUSE's name, not the engine's. Applied live, and
+    // fed into the blink through normalTitle so a mark that is already running
+    // starts alternating the new name rather than the old one.
+    const t = (name || "").trim();
+    if (!t) return;
+    normalTitle = t;
+    rememberTitle(t);                         // so the NEXT load starts correct
+    if (!alertRaised) document.title = normalTitle;
+  }
+
+  function setHouseFavicon(url) {
+    // "" means the house has none: the normal icon is the page's blank data:,
+    // which is still a real value the blink can return to.
+    normalIcon = (url && url.trim()) ? url.trim() : "data:,";
+    if (!alertRaised) setFavicon(normalIcon);
+  }
+
+  function markAllowed() {
+    return TAB_ALERT.enabled && tabAlertWanted && inWorld && connected;
+  }
+
+  function setTabAlertWanted(on) {
+    tabAlertWanted = !!on;
+    // Turning it off mid-session must take effect NOW, not at the next refocus —
+    // otherwise the thing you just switched off is still blinking at you.
+    if (!tabAlertWanted) clearAlert();
+  }
+
+  function noteActivity() {
+    // Called from the ONE place an incoming room line is appended. A line you
+    // are looking at is not news, so an active tab is left alone.
+    if (!markAllowed() || tabActive()) return;
+    raiseAlert();
+  }
+
+  // Coming back — by focus or by unhiding — clears it immediately.
+  window.addEventListener("focus", () => { windowFocused = true; clearAlert(); });
+  window.addEventListener("blur", () => { windowFocused = false; });
+  document.addEventListener("visibilitychange", () => {
+    if (tabActive()) clearAlert();
+  });
+
+  function renderProgress(secs, label) {
+    // A single terminal line that fills over `secs`, then freezes as plain text.
+    const stick = atBottom();
+    const div = document.createElement("div");
+    div.className = "line";
+    screenEl.appendChild(div);
+    while (screenEl.childElementCount > MAX_LINES) {
+      screenEl.removeChild(screenEl.firstChild);
+    }
+    const W = PROGRESS.width;
+    const draw = (frac) => {
+      const n = Math.max(0, Math.min(W, Math.round(frac * W)));
+      div.textContent = label + " [" + PROGRESS.fillChar.repeat(n)
+                      + PROGRESS.emptyChar.repeat(W - n) + "]";
+      if (stick) screenEl.scrollTop = screenEl.scrollHeight;
+    };
+    const dur = Math.max(0, secs * 1000);
+    if (dur === 0) { draw(1); return; }        // no duration -> instantly full
+    const start = performance.now();
+    const tick = () => {
+      const frac = (performance.now() - start) / dur;
+      if (frac >= 1) { draw(1); return; }      // complete -> freeze, stop
+      draw(frac);
+      requestAnimationFrame(tick);
+    };
+    draw(0);
+    requestAnimationFrame(tick);
+  }
+
+  // ---- endpoint ----------------------------------------------------------
+  function wsURL() {
+    const override = new URLSearchParams(location.search).get("ws");
+    if (override) return override;                 // ?ws= wins (dev escape hatch)
+    if (location.protocol === "file:") return "ws://127.0.0.1:8765";
+    // Any https page (production, or a local Caddy at :8443) uses same-origin
+    // wss:///ws — a secure page cannot open an insecure ws:// (mixed content).
+    if (location.protocol === "https:") return "wss://" + location.host + "/ws";
+    // Plain http: a bare static server on localhost talks to the dev WS door.
+    const host = location.hostname;
+    if (host === "127.0.0.1" || host === "localhost") return "ws://127.0.0.1:8765";
+    return "ws://" + location.host + "/ws";
+  }
+
+  // ---- connection --------------------------------------------------------
+  let ws = null;
+  let connected = false;
+
+  // ---- masked entry ------------------------------------------------------
+  //
+  // Masking swaps the compose textarea for a single-line <input> (a textarea
+  // can't be driven this way cleanly). That input is type="text" and NEVER
+  // holds the secret: every insertion is cancelled before it lands, the real
+  // characters accumulate in `maskBuf` here in this closure, and the field is
+  // repainted as one dot per character. Enter sends the buffer.
+  //
+  // Why not type="password": see the comment on the element. Why not
+  // -webkit-text-security on a text field: an engine that doesn't support it
+  // shows the password in cleartext, and failing open on a secret is worse
+  // than any popup.
+  //
+  // Buffer semantics: APPEND-ONLY. Typing appends, Backspace drops the last
+  // character, Escape clears, Enter sends and clears. The caret is pinned to
+  // the end, so there is no caret editing inside a secret — you cannot see
+  // what you are editing anyway, and the simple rule is the one that can't
+  // silently desync from what gets sent.
+  const MASK_CHAR = "\u2022";                  // the dot the field displays
+  let maskBuf = "";
+
+  // JS strings are immutable, so this drops the reference rather than wiping
+  // memory — the most that can honestly be done here.
+  function clearMaskBuf() { maskBuf = ""; maskEl.value = ""; }
+
+  function renderMask() {
+    maskEl.value = MASK_CHAR.repeat(maskBuf.length);
+    // Pin the caret to the end: append-only, so there is nowhere else to be.
+    const end = maskEl.value.length;
+    try { maskEl.setSelectionRange(end, end); } catch (e) { /* not focused yet */ }
+  }
+
+  // One line, no control characters — the same shape a typed secret has.
+  function maskSanitize(text) {
+    return String(text).replace(/[\r\n\t]/g, "").replace(/[\x00-\x1f\x7f]/g, "");
+  }
+  function maskAppend(text) {
+    const clean = maskSanitize(text);
+    if (clean) { maskBuf += clean; renderMask(); }
+  }
+
+  function setMasked(on) {
+    if (on) {
+      clearMaskBuf();
+      inputEl.hidden = true;
+      maskEl.hidden = false;
+      maskEl.focus();
+    } else {
+      maskEl.hidden = true;
+      clearMaskBuf();                 // echo on: the secret goes with the prompt
+      inputEl.hidden = false;
+      resizeCompose();
+      inputEl.focus();
+    }
+  }
+  function activeField() { return maskEl.hidden ? inputEl : maskEl; }
+
+  // ---- width report (the ONE frame that goes client -> server) -----------
+  //
+  // A portrait phone is about 40 usable monospace columns; a laptop is 80+. The
+  // server lays every screen out — the map, the help grid, the wholist, the ***
+  // rules — so it is the server that has to know, and only this page can tell
+  // it. So the browser measures and reports; the server decides (below its
+  // threshold means narrow) and renders. Nothing about layout moves into the
+  // client: this sends one integer and changes no pixels itself.
+  //
+  // Covenant: one number about the SCREEN. Never content, never stored (no
+  // localStorage key — the measurement is true only for right now), and it
+  // buys no new external request of any kind.
+  const WIDTH = {
+    enabled: true,
+    probe: "0123456789",     // measured as a run, so kerning averages out
+    min: 10, max: 500,       // outside this, our measurement is wrong, not the screen
+    settleMs: 150,           // resize debounce: a drag fires dozens of events
+  };
+  let reportedCols = 0;      // last value SENT, so a resize that changes nothing is silent
+  let widthTimer = null;
+
+  function measureColumns() {
+    // Measured, never assumed: the font is self-hosted but may not have loaded,
+    // the user may have zoomed, and a phone's idea of a CSS pixel is its own.
+    try {
+      const probe = document.createElement("span");
+      probe.textContent = WIDTH.probe;
+      probe.style.cssText = "position:absolute;visibility:hidden;white-space:pre;" +
+                            "left:-9999px;top:0;padding:0;margin:0;border:0;";
+      screenEl.appendChild(probe);
+      const per = probe.getBoundingClientRect().width / WIDTH.probe.length;
+      screenEl.removeChild(probe);
+      if (!isFinite(per) || per <= 0) return 0;
+      const cs = getComputedStyle(screenEl);
+      const pad = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+      const cols = Math.floor((screenEl.clientWidth - pad) / per);
+      return (cols >= WIDTH.min && cols <= WIDTH.max) ? cols : 0;
+    } catch (e) {
+      return 0;              // never throw into connect() or a resize handler
+    }
+  }
+
+  function sendWidth(force) {
+    if (!WIDTH.enabled || !connected || !ws) return;
+    const cols = measureColumns();
+    if (!cols) return;                              // unmeasurable: say nothing
+    if (!force && cols === reportedCols) return;    // unchanged: say nothing
+    reportedCols = cols;
+    try { ws.send(CONTROL + "width " + cols); } catch (e) { /* onclose handles it */ }
+  }
+
+  function scheduleWidth() {
+    // Debounced: dragging a window edge fires resize dozens of times a second,
+    // and a rotation fires several as the viewport settles.
+    if (widthTimer) clearTimeout(widthTimer);
+    widthTimer = setTimeout(() => { widthTimer = null; sendWidth(false); },
+                            WIDTH.settleMs);
+  }
+
+  window.addEventListener("resize", scheduleWidth);
+  // Older iOS fires orientationchange without a useful resize; harmless to have
+  // both, since sendWidth() is a no-op when the number has not moved.
+  window.addEventListener("orientationchange", scheduleWidth);
+
+  // ---- remember me: the resume token ------------------------------------
+  //
+  // The server issues an opaque token to a browser whose ACCOUNT has asked to be
+  // remembered (`.remember on`, off by default, asked once at signup). The
+  // client's whole job is custody: hold it, present it on connect, replace it
+  // when the server rotates it, and drop it when told to.
+  //
+  // It is stored because it has to be. A phone browser discards a backgrounded
+  // tab to save memory, and a discarded tab is indistinguishable from a fresh
+  // open — so an in-memory token would be lost exactly when it is most wanted,
+  // which is the case this feature exists for.
+  //
+  // Covenant: one opaque string, never a password, never content. It is the only
+  // new storage key, it appears only for an account that opted in, and `.quit`
+  // or `.remember off` removes it from both ends.
+  const RESUME_KEY = "heresay-resume";    // beside heresay-theme / raise / title
+
+  function storedResume() {
+    try { return localStorage.getItem(RESUME_KEY) || ""; } catch (e) { return ""; }
+  }
+  function setStoredResume(token) {
+    try {
+      if (token) localStorage.setItem(RESUME_KEY, token);
+      else localStorage.removeItem(RESUME_KEY);   // revoked: leave nothing behind
+    } catch (e) { /* private mode / storage off: we simply are not remembered */ }
+  }
+
+  function sendResumeHello() {
+    // ALWAYS sent, immediately after the width report, even with no token —
+    // the empty frame is how the server knows the opening hello is over and it
+    // can stop waiting and paint. Costs one frame; saves a timeout per login.
+    if (!connected || !ws) return;
+    const tok = storedResume();
+    try { ws.send(CONTROL + "resume" + (tok ? " " + tok : "")); }
+    catch (e) { /* onclose handles it */ }
+  }
+
+  // ---- reconnect on return ----------------------------------------------
+  //
+  // A phone that was backgrounded comes back with a dead socket and no event
+  // that says so. These three are the moments a person is plausibly looking at
+  // the page again; each is a no-op unless the socket is actually gone, and
+  // they share one guard so a burst of them cannot hammer the server.
+  const RESUME = {
+    autoReconnect: true,      // the operator's switch, like SOUND/TAB_ALERT
+    reconnectMinMs: 3000,     // never more often than this, whatever fires
+  };
+  let reconnectGuard = 0;
+  function maybeReconnect() {
+    if (connected || !RESUME.autoReconnect) return;
+    const t = now();
+    if (t - reconnectGuard < RESUME.reconnectMinMs) return;
+    reconnectGuard = t;
+    connect();
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) maybeReconnect();
+  });
+  window.addEventListener("pageshow", maybeReconnect);
+  window.addEventListener("online", maybeReconnect);
+  window.addEventListener("focus", maybeReconnect);
+
+  function connect() {
+    clearScreen();
+    setMasked(false);
+    reportedCols = 0;        // a fresh socket has never been told anything
+    // ...including that it is in-world. A reconnect starts at the greeting (or,
+    // with a resume token, is told again a moment later), so this must be false
+    // until the server says otherwise.
+    setInWorld(false);
+    let url;
+    try { url = wsURL(); } catch (e) { addLine("Bad WS URL."); return; }
+
+    try { ws = new WebSocket(url); }
+    catch (e) { addLine("Could not open a connection."); return; }
+
+    ws.onopen = () => {
+      connected = true;
+      // FIRST, before anything the user can type. The server holds the login
+      // banner for a moment waiting for exactly this, so that a phone's very
+      // first paint is already laid out for a phone.
+      sendWidth(true);
+      // Then the token, in the same burst. Order matters: a resumed session's
+      // very first `.look` is rendered at the width reported one frame earlier.
+      sendResumeHello();
+    };
+
+    ws.onmessage = (ev) => {
+      const data = typeof ev.data === "string" ? ev.data : "";
+      if (data.startsWith(CONTROL)) {          // control frames: never shown
+        if (data === CONTROL + "echo off") setMasked(true);
+        else if (data === CONTROL + "echo on") setMasked(false);
+        else if (data.startsWith(CONTROL + "sound ")) playSound(data.slice(7));
+        else if (data.startsWith(CONTROL + "tab_alert ")) {
+          // The resident's own `.ignore tab_alert` setting, pushed at login and
+          // on every change. Like every control frame: read, never printed.
+          setTabAlertWanted(data.slice((CONTROL + "tab_alert ").length).trim() === "on");
+        }
+        else if (data.startsWith(CONTROL + "raise_bounds ")) {
+          // The house's `.raise_prompt` clamp, pushed on connect and on change.
+          const parts = data.slice((CONTROL + "raise_bounds ").length).trim().split(/\s+/);
+          setRaiseBounds(parseInt(parts[0], 10), parseInt(parts[1], 10));
+        }
+        else if (data === CONTROL + "resume" ||
+                 data.startsWith(CONTROL + "resume ")) {
+          // A token to keep, or an empty frame meaning "forget the one you
+          // have" (revoked, expired, or remember-me switched off).
+          const tok = data.slice((CONTROL + "resume").length).trim();
+          setStoredResume(tok);
+        }
+        else if (data === CONTROL + "inworld on" ||
+                 data === CONTROL + "inworld off") {
+          // Whether this connection is attached to a resident standing in a
+          // room — the only state the tab mark may blink in. See setInWorld.
+          setInWorld(data.endsWith(" on"));
+        }
+        else if (data.startsWith(CONTROL + "title ")) {
+          // The house's own name, for the tab.
+          setHouseTitle(data.slice((CONTROL + "title ").length));
+        }
+        else if (data.startsWith(CONTROL + "favicon ")) {
+          // The house's icon, already a data: URL — so the browser still makes
+          // no external request. Empty means "none": the blank icon.
+          setHouseFavicon(data.slice((CONTROL + "favicon ").length));
+        }
+        else if (data.startsWith(CONTROL + "progress ")) {
+          const rest = data.slice((CONTROL + "progress ").length);
+          const sp = rest.indexOf(" ");
+          const secs = parseFloat(sp < 0 ? rest : rest.slice(0, sp));
+          renderProgress(isFinite(secs) ? secs : 0, sp < 0 ? "" : rest.slice(sp + 1));
+        }
+        return;
+      }
+      if (data === "\x07") { playSound("beep"); return; }  // @beep -> beep cue
+      addLine(data);
+      // The ONE hook: a line the ROOM sent, appended to the screen. Deliberately
+      // here rather than inside addLine(), so the client's own local command echo
+      // and its "Connection closed." notice never mark the tab — you are not
+      // away from a tab you are typing into.
+      noteActivity();
+    };
+
+    ws.onclose = () => {
+      connected = false;
+      // The session is over: no more blinking, and any blink in progress stops
+      // now rather than lingering over a dead socket until someone refocuses.
+      setInWorld(false);
+      setMasked(false);
+      // Ephemerality: the screen clears; nothing said survives the connection.
+      clearScreen();
+      addLine("Connection closed. Press Enter to reconnect.");
+    };
+
+    ws.onerror = () => { /* onclose will follow */ };
+  }
+
+  // ---- compose box: auto-grow + hard 6-row cap ---------------------------
+  function lineHeightPx(el) {
+    const lh = parseFloat(getComputedStyle(el).lineHeight);
+    return isFinite(lh) && lh > 0 ? lh : 20;
+  }
+  function visualRows(el) {
+    // Measure by shrinking to auto and reading the content height (padding is 0).
+    const prev = el.style.height;
+    el.style.height = "auto";
+    const rows = Math.round(el.scrollHeight / lineHeightPx(el));
+    el.style.height = prev;
+    return Math.max(1, rows);
+  }
+  function resizeCompose() {
+    const stick = atBottom();
+    const lh = lineHeightPx(inputEl);
+    inputEl.style.height = "auto";
+    const rows = Math.min(COMPOSE_MAX_LINES,
+                          Math.max(1, Math.round(inputEl.scrollHeight / lh)));
+    inputEl.style.height = (rows * lh) + "px";
+    // Only a viewport reflow could push a capped draft over 6 rows; then scroll.
+    inputEl.style.overflowY = rows >= COMPOSE_MAX_LINES ? "auto" : "hidden";
+    if (stick) screenEl.scrollTop = screenEl.scrollHeight;
+  }
+  function setCompose(v) {
+    inputEl.value = v;
+    lastValue = inputEl.value;
+    lastSel = inputEl.selectionStart;
+    resizeCompose();
+  }
+  function beep() { try { playSound("beep"); } catch (e) {} }
+
+  let lastValue = "";   // last value that fit within the cap (for refuse-and-revert)
+  let lastSel = 0;
+
+  // Enforce the cap after every change. A single insertion that overflows is
+  // refused (revert + beep); a paste is trimmed to the longest prefix that fits.
+  inputEl.addEventListener("input", (e) => {
+    if (visualRows(inputEl) > COMPOSE_MAX_LINES) {
+      if (e.inputType === "insertFromPaste" || e.inputType === "insertFromDrop") {
+        const full = inputEl.value;
+        let lo = 0, hi = full.length;
+        while (lo < hi) {                         // binary-search the longest fit
+          const mid = Math.ceil((lo + hi) / 2);
+          inputEl.value = full.slice(0, mid);
+          if (visualRows(inputEl) <= COMPOSE_MAX_LINES) lo = mid; else hi = mid - 1;
+        }
+        inputEl.value = full.slice(0, lo);
+        inputEl.selectionStart = inputEl.selectionEnd = lo;
+      } else {
+        inputEl.value = lastValue;                // refuse the keystroke
+        const c = Math.min(lastSel, lastValue.length);
+        inputEl.selectionStart = inputEl.selectionEnd = c;
+      }
+      beep();
+    }
+    lastValue = inputEl.value;
+    lastSel = inputEl.selectionStart;
+    resizeCompose();
+  });
+
+  // ---- input history (session-only, in memory) ---------------------------
+  const history = [];
+  let histIdx = -1;   // -1 = editing a fresh line
+
+  function recall(dir) {
+    if (!history.length) return;
+    if (histIdx === -1) histIdx = history.length;
+    histIdx += dir;
+    if (histIdx < 0) histIdx = 0;
+    if (histIdx >= history.length) { histIdx = -1; setCompose(""); return; }
+    setCompose(history[histIdx]);
+    requestAnimationFrame(() => {
+      inputEl.selectionStart = inputEl.selectionEnd = inputEl.value.length;
+    });
+  }
+
+  // On send, a paragraph collapses to ONE line: every run of whitespace (newlines
+  // included) becomes a single space, ends trimmed — so a leading '.' still reads
+  // as a command and the server never gets more than one line per submission.
+  function collapse(s) { return s.replace(/\s+/g, " ").trim(); }
+
+  // ---- command echo (web door only) --------------------------------------
+  // A terminal shows you what you typed because the terminal echoes locally;
+  // a browser textarea does not, so a command and its answer arrive with no
+  // sign of the question. The server can't do this for us — a server-side echo
+  // would double-print for every socket user — so it lives here.
+  //
+  // The exceptions are the conversation verbs, whose results ALREADY echo
+  // themselves: you see your own say, emote, think, shout and (since they
+  // render as marked speech) your own tell and remote. Echoing those would
+  // print the line twice. Keep this list matching the server's conversation
+  // class in commands.py. The prefix forms (; > <) don't start with '.' and
+  // are conversation anyway, so they never reach this test.
+  // (".emote" is here though it was missing from the spec's list: it is the same
+  // command as ".e"/".em" server-side, so omitting it would double-print.)
+  const NO_ECHO = [".e", ".em", ".emote", ".think", ".tell", ".t", ".remote",
+                   ".r", ".shout"];
+  function echoCommand(line) {
+    if (!line.startsWith(".")) return;            // speech, or nothing typed
+    const verb = line.split(" ")[0].toLowerCase();
+    if (NO_ECHO.indexOf(verb) !== -1) return;
+    addLine("");                                  // one unit = one leading blank
+    addLine(line);                                // verbatim: '.m' stays '.m'
+  }
+
+  function submitCompose() {
+    if (!connected) { setCompose(""); connect(); return; }   // Enter = reconnect
+    if (!maskEl.hidden) return;              // masked input is never echoed
+    // Sending snaps the output to the newest line, even if you had scrolled up
+    // to read history — standard terminal behaviour, and on a phone the whole
+    // difference between "I typed a command" and "I can see what it said".
+    //
+    // ONE call, here, covering all three ways out of this function (a theme
+    // command, a raise command, and a line to the server): from this point the
+    // line IS submitted, and pinToBottom defers to requestAnimationFrame, so it
+    // lands AFTER everything below has appended its lines and after setCompose
+    // has collapsed a multi-row draft — both of which change scrollHeight. That
+    // deferral is why one early call is enough, and why it beats assigning
+    // scrollTop by hand at each exit.
+    //
+    // It does not fight addLine's own sticky-scroll: that only acts when you
+    // were already at the bottom, and this rAF runs after it either way.
+    pinToBottom();
+    const line = collapse(inputEl.value);
+    echoCommand(line);                       // before the answer arrives
+    // Theme is a page concern; it never reaches the server.
+    const m = line.match(/^\.theme\s+(\S+)\s*$/i);
+    if (m) {
+      const ok = applyTheme(m[1].toLowerCase());
+      addLine(ok ? "Theme: " + m[1].toLowerCase() : "Themes: default, green, amber.");
+      setCompose("");
+      return;
+    }
+    // So is where the input line sits — it depends on THIS machine's taskbar,
+    // which the server cannot know. Bare form included, so `.raise_prompt` on
+    // its own reports rather than being sent off as an unknown command.
+    const rp = line.match(/^\.raise_prompt\s*(.*)$/i);
+    if (rp) {
+      addLine(handleRaise(rp[1]));
+      setCompose("");
+      return;
+    }
+    if (line) {                                   // remember the collapsed line
+      if (history[history.length - 1] !== line) history.push(line);
+      if (history.length > 100) history.shift();
+    }
+    histIdx = -1;
+    // Trim to the wire cap before sending — see MAX_SEND. The server would
+    // truncate to the same length anyway; doing it here is what keeps an
+    // over-long paste a trimmed line rather than a dropped connection.
+    try { ws.send(line.slice(0, MAX_SEND)); }
+    catch (err) { /* closed mid-send; onclose handles it */ }
+    setCompose("");
+  }
+
+  // ---- input handling ----------------------------------------------------
+  inputEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      if (e.shiftKey) return;          // Shift+Enter: insert a newline (cap enforced on input)
+      e.preventDefault();
+      submitCompose();
+    } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+      // History fires ONLY when the draft is empty; otherwise arrows move the caret.
+      if (inputEl.value.length === 0) {
+        e.preventDefault();
+        recall(e.key === "ArrowUp" ? -1 : 1);
+      }
+    }
+  });
+
+  // Masked entry. `beforeinput` is the one choke point every insertion passes
+  // through — keystrokes, paste, drag-and-drop, autofill, IME commits, and
+  // mobile virtual keyboards all arrive here — so cancelling it there is what
+  // guarantees the field never holds a real character, no matter the route in.
+  maskEl.addEventListener("beforeinput", (e) => {
+    if (maskEl.hidden) return;
+    const t = e.inputType || "";
+    // Composition is the one thing preventDefault can't reliably cancel; it is
+    // handled on commit in compositionend below.
+    if (t === "insertCompositionText") return;
+    e.preventDefault();                       // nothing ever lands in the field
+    if (t.startsWith("insert")) {
+      // Paste and drop carry their text on dataTransfer; everything else on data.
+      let text = e.data;
+      if (text == null && e.dataTransfer) text = e.dataTransfer.getData("text");
+      if (t === "insertLineBreak" || t === "insertParagraph") text = "";
+      maskAppend(text || "");
+    } else if (t === "deleteContentBackward" || t === "deleteWordBackward" ||
+               t === "deleteSoftLineBackward") {
+      // Append-only, so backspace means "drop the last character" — and the
+      // word/line variants would delete a secret wholesale, which is surprising
+      // when you can't see it. One at a time.
+      if (maskBuf) { maskBuf = maskBuf.slice(0, -1); renderMask(); }
+    }
+    // Forward deletes, cut, and anything else: ignored. The caret is at the end
+    // and the field only ever contains dots, so there is nothing there to take.
+  });
+
+  // IME: a composition can't be cancelled mid-flight, so take the committed
+  // string and repaint. LIMITATION, stated plainly: while composing, the
+  // in-progress text is briefly visible in the field before it commits. Typing
+  // a password through an IME is rare and the alternative — blocking
+  // composition — would make some passwords untypable. ASCII entry never
+  // reaches this path at all: beforeinput cancels it first.
+  maskEl.addEventListener("compositionend", (e) => {
+    if (maskEl.hidden) return;
+    maskAppend(e.data || "");
+    renderMask();                             // wipe whatever the IME wrote
+  });
+
+  // Belt: if anything at all still slips a character into the field, the field
+  // is repainted from the buffer, so cleartext can never survive a frame.
+  maskEl.addEventListener("input", () => {
+    if (maskEl.hidden) return;
+    if (maskEl.value !== MASK_CHAR.repeat(maskBuf.length)) renderMask();
+  });
+
+  // Enter sends the buffer verbatim — never collapsed, never in history, never
+  // written anywhere but the socket. Shift+Enter is not a newline here.
+  maskEl.addEventListener("keydown", (e) => {
+    if (maskEl.hidden) return;
+    if (e.key === "Escape") { e.preventDefault(); clearMaskBuf(); return; }
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    if (!connected) { clearMaskBuf(); connect(); return; }
+    const secret = maskBuf;
+    clearMaskBuf();                           // cleared before the send can throw
+    // Same cap as the compose line, for the same reason: a paste into the
+    // password field must not be able to close the socket. The policy ceiling
+    // is 128 characters, so nothing real is reachable by this.
+    try { ws.send(secret.slice(0, MAX_SEND)); } catch (err) { /* onclose handles it */ }
+  });
+
+  // Keep focus on whichever field is live; clicking anywhere returns to it.
+  document.addEventListener("mousedown", (e) => {
+    if (e.target !== inputEl && e.target !== maskEl) {
+      if (window.getSelection && String(window.getSelection())) return;  // allow selection
+      setTimeout(() => activeField().focus(), 0);
+    }
+  });
+
+  connect();
+  resizeCompose();
+  inputEl.focus();
+})();
+</script>
+</body>
+</html>

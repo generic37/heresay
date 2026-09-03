@@ -1,0 +1,27 @@
+load_report — what the engine made of your files
+
+  .load_report          the last load: counts, one-way passages, warnings
+
+Every time the house starts it reads the world, the help pages, the
+theme, the echoes and the rest, and it says what it found. That used
+to go only to the server's log, where a builder could not reach it.
+This is the same report, kept in memory and readable from in here.
+
+The counts tell you what loaded. The one-way passages are the typo
+detector for exits: a passage declared from one side only is legal
+(a trapdoor is a fine thing) but it is also exactly what a forgotten
+line looks like.
+
+The warnings are the part worth reading. A retired header, a narrow
+file whose room does not exist, a malformed theme, a favicon that
+could not be read, an account whose rank the ladder no longer has —
+each one is something the house went on without, and each one is
+something you probably meant differently.
+
+"no warnings." is the good outcome.
+
+It describes THIS run. Nothing is written to disk and nothing
+survives a restart, so a fresh report means a fresh load: fix the
+file, restart the house, look again.
+
+Staff and the owner.

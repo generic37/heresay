@@ -1,0 +1,13 @@
+ _  _ ___ ___ ___ ___   _ __   __
+| || | __| _ \ __/ __| /_\\ \ / /
+| __ | _||   / _|\__ \/ _ \\ V /
+|_||_|___|_|_\___|___/_/ \_\|_|
+
+          * * *
+
+  What's said here stays here.
+
+  (template — replace
+   house/greeting.narrow.txt)
+
+You had to be there.

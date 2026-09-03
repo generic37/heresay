@@ -1,0 +1,12 @@
+# The 1st of each month at 09:10 UTC — about 4-5am US Eastern, the quietest
+# hour the rooms have. Persistent=true so a box that was off at the time still
+# runs it once when it comes back.
+[Unit]
+Description=Monthly heresay maintenance (1st, 09:10 UTC)
+
+[Timer]
+OnCalendar=*-*-01 09:10:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

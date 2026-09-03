@@ -1,0 +1,10 @@
+.look — where am I?
+
+Re-shows the room: name, description, present company, exits, and the
+topic if one is set. The same view you got on arrival or entry to the
+room. Shortcut: .l
+
+"Present company" lists everyone in the room, yourself included, in
+alphabetical order — each name followed by that person's description
+(.desc sets your own). Rank is not shown here; .examine <name> tells
+you what rank someone holds.

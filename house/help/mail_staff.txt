@@ -1,0 +1,6 @@
+.mail_staff — send a note to the house
+
+.mail_staff <text> leaves one line in the staff's shared letterbox;
+every staff account sees "You have staff mail." at login. Use it when
+none of them is awake to hear a .call_staff call. Signed with your name,
+read only by the house's staff, gone once they've dealt with it.

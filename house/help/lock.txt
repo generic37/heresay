@@ -1,0 +1,7 @@
+.lock — locks the room
+
+In a lockable room anyone inside may lock the door: .go then 
+refuses others with "The door is locked." .invite still works 
+through a lock. The lock lifts when the room empties or the 
+door is unlocked with .unlock. Staff can pass a lock but you 
+will always see when they do.

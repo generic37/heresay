@@ -1,0 +1,19 @@
+.reboot — initialize server
+
+Technical notes, for those who must know:
+
+The server is a single 80486DX2 (66 MHz, the good one) in a beige
+tower under the owner's desk. Initializing it flushes the world
+state, re-detects the primary IDE drive (QUANTUM LP240A 540MB), and
+replays the boot sequence from C:\HOUSE\TALKER.EXE. The process
+takes roughly ninety seconds, during which the machine is audibly
+unhappy.
+
+WARNING: Do not run this command. Initialization interrupts every
+conversation on the server, and the drive has been making a noise
+lately that nobody wants to discuss. It is documented here for
+completeness, in the way one documents a fire axe. If you are going
+to type it anyway, at least have the decency to answer the
+confirmation honestly.
+
+The owner thanks you for not rebooting the server.

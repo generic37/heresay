@@ -1,0 +1,6 @@
+.profile — your story
+
+Opens a small editor: type lines, .end saves, .abort discards. Up
+to 20 lines, shown to anyone who .examines you. The one place you
+get to be more than a sentence; residents who fill theirs well are
+the ones who make the place feel inhabited. Encouraged, not required.

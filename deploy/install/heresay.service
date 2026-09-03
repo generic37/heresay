@@ -1,0 +1,125 @@
+# systemd unit for the heresay daemon (production: your.domain.example).
+#
+# Install (as root), after deploy/deploy.sh has populated /opt/heresay and
+# /etc/heresay/config.toml exists:
+#   cp deploy/install/heresay.service /etc/systemd/system/heresay.service
+#   systemctl daemon-reload
+#   systemctl enable --now heresay
+#
+# All three doors bind ports > 1024 (2323 TLS, 2324 + 8765 loopback), so no
+# CAP_NET_BIND_SERVICE is needed. 80/443 belong to Caddy, not this daemon.
+
+[Unit]
+Description=heresay — presence-only chat daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=heresay
+Group=heresay
+WorkingDirectory=/opt/heresay
+ExecStart=/opt/heresay/.venv/bin/python -m heresay -c /etc/heresay/config.toml
+# ⛔ on-failure, NOT always (changed v1.46.0) — and this is what makes
+# `--shutdown` work at all. The timed shutdown ends with the engine exiting 0;
+# under `Restart=always` systemd would bring the house straight back, so the
+# command could not do the one thing it is for. A crash still restarts.
+Restart=on-failure
+RestartSec=2
+
+# ⚠ The ceiling on a WEDGED shutdown — not on a countdown (comment corrected
+# v1.47.0; the value is unchanged). On SIGTERM the engine does NOT wait a
+# countdown out: `_amain` goes straight to `aclose()`, which CANCELS any pending
+# `--shutdown` and closes the doors under bounded 2s waits. So a normal stop
+# takes seconds whatever is scheduled, and this number governs only how long
+# systemd tolerates a process that has stopped responding before SIGKILL.
+# Kept generous as headroom; the cost is that a genuinely wedged engine delays a
+# `systemctl restart` by up to five minutes.
+TimeoutStopSec=300
+
+# ---------------------------------------------------------------------------
+# Resource ceilings (v1.49.0, audit F1)
+#
+# ⚠ MemoryMax IS A TUNABLE, AND TOO LOW IS WORSE THAN ABSENT. argon2id is
+# deliberately memory-hard — m=64 MiB, p=4, TRANSIENT, per hash in flight — and
+# every login, password change and recovery attempt pays it in a worker thread.
+# Concurrency is bounded (3 connections per IP, the server-wide auth ceiling),
+# but a burst of logins really does allocate hundreds of megabytes for a moment.
+# 1G is a conservative default with headroom; SIZE IT TO YOUR BOX. If the daemon
+# is OOM-killed mid-conversation you have set this too low, and a cap that kills
+# the house is worse than no cap at all.
+MemoryMax=1G
+TasksMax=64
+LimitNOFILE=4096
+# Anything the daemon creates is owner-only. Every store already asks for 0600
+# explicitly or via mkstemp; this is the belt under that.
+UMask=0077
+
+# ⛔ systemd OWNS the state directory's mode from here (v1.49.0). It used to be
+# a hand-made directory whose permissions were whatever the operator's umask
+# gave it — the files inside were 0600 either way, but a world-listable state
+# dir is a map of what is worth taking. StateDirectory= creates it, chowns it to
+# User=, enforces the mode on every start, and implies ReadWritePaths for it.
+StateDirectory=heresay
+StateDirectoryMode=0700
+
+# Hardening. The daemon reads code from /opt/heresay and config/certs from
+# /etc/heresay (both read-only to it); the ONLY path it writes is its state dir.
+NoNewPrivileges=true
+ProtectSystem=strict
+# ⚠ Redundant with StateDirectory= above (which implies it) and kept anyway: the
+# config names ABSOLUTE paths under /var/lib/heresay, so the directive that says
+# so out loud is worth more than the line it saves.
+ReadWritePaths=/var/lib/heresay
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+ProtectProc=invisible
+ProcSubset=pid
+RestrictSUIDSGID=true
+RemoveIPC=true
+# It needs no capabilities at all: every port it binds is above 1024.
+CapabilityBoundingSet=
+AmbientCapabilities=
+SystemCallArchitectures=native
+# ⚠ AF_UNIX is REQUIRED since v1.46.0: the local control socket
+# (/var/lib/heresay/control.sock, 0600) is how deploy.sh and `--shutdown` get a
+# line to every connected session. Without it the bind fails at startup — the
+# daemon still runs, but the graceful countdown silently does not.
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+
+# ⚠⚠ THE ONE DIRECTIVE IN THIS FILE THAT CAN STOP A WORKING DAEMON STARTING.
+#
+# @system-service is the standard allow-list for a network service, and Python
+# with argon2-cffi and cryptography is normally fine under it — but "normally"
+# is doing real work in that sentence: it depends on the libc, the kernel and
+# the wheels this particular box resolved. It could not be verified from the
+# development machine, so it ships ACTIVE and flagged rather than quietly
+# omitted, because the alternative is a hardening line nobody ever turns on.
+#
+# ⛔ AFTER INSTALLING THIS UNIT, CONFIRM THE DAEMON STARTED:
+#     systemctl daemon-reload && systemctl restart heresay
+#     systemctl status heresay && journalctl -u heresay -n 20
+# If it fails to start, COMMENT OUT THE TWO LINES BELOW and reload. A daemon
+# that runs without a syscall filter is strictly better than one that does not
+# run; nothing else in this file depends on them.
+#
+# EPERM rather than the default SIGSYS, so a blocked call is an error the
+# process can report instead of an instant kill with no explanation.
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+
+# No conversation is ever written; journald only receives operational lines.
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

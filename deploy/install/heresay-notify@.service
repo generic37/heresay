@@ -1,0 +1,12 @@
+# The one unit every OnFailure= points at. `%i` is the failed unit's name, so
+# ONE template covers every service that can fail rather than a bespoke notifier
+# per unit — and a service added later needs only its drop-in.
+#
+# ⚠ %H is systemd's hostname specifier: the alert names the box it came from
+# without this file naming anybody's box.
+[Unit]
+Description=Push ntfy alert that %i failed
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/heresay-notify.sh max "Heresay: %i FAILED" "%i entered failed state on %H. Check: systemctl status %i ; journalctl -u %i -n 50"

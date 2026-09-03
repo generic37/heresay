@@ -1,0 +1,7 @@
+name: grotto
+exits: spring, shore, concourse
+lockable: yes
+
+A low cave at the waterline, floored with wet shingle and lit green from
+below. The tide has left things here in rows, sorted by size, as if
+something patient had been doing the sorting.

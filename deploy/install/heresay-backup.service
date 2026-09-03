@@ -1,0 +1,7 @@
+# Nightly tar of /var/lib/heresay. Triggered by heresay-backup.timer.
+[Unit]
+Description=Nightly heresay state backup
+
+[Service]
+Type=oneshot
+ExecStart=/opt/heresay/deploy/bin/heresay-backup.sh

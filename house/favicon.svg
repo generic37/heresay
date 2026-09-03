@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img"
+     aria-label="An open door">
+  <!-- The TEMPLATE tab icon: a plain open doorway, drawn to read at 16px.
+       Flat fills only, no gradients, no strokes to thin out, and no external
+       reference of any kind (it ships inside house/ and reaches the browser
+       as a base64 data: URL, so the page still makes no outside request).
+       Replace it with your own .svg/.png and name it in theme.toml, or drop
+       the `favicon` key entirely for a blank tab. -->
+  <rect x="4" y="2" width="24" height="28" rx="2" fill="#3a3a3a"/>
+  <rect x="7" y="5" width="18" height="22" fill="#e8e2d4"/>
+  <circle cx="21.5" cy="16" r="1.4" fill="#3a3a3a"/>
+</svg>

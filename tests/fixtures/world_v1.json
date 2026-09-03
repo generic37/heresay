@@ -1,0 +1,657 @@
+{
+ "map": "                         .---------.\n                         | rampart |\n                         '----+----'\n                              |\n          .---------.   .-----+-----.   .---------.\n          | rotunda +---+ mirror    +---+  stall  |\n          '---------'   |   hall    |   '----+----'\n                        '-----+-----'        |\n                              |              |\n     .---------.        .-----+-----.        |\n     |  lawn   +--------+  gallery  |        |\n     '----+----'        '-----+-----'        |\n          |                   |              |\n     .----+----.        .-----+-----.   .----+----.\n     |  plaza  +--------+  atrium   +---+ orchard |\n     '----+----'        '-----+-----'   '----+----'\n          |                   |              |\n   .------+------.      .-----+-----.   .----+----.\n   |   hall      |      |    oak    |   |  lodge  |\n   '------+------'      '-----+-----'   '---------'\n          |                   |\n   .------+------.      .-----+-----.   .---------.\n   |  refectory  |      |  parlour  |   |  glade  |\n   '-------------'      '-----+-----'   '---------'\n                              |\n        .---------.     .-----+-----.   .---------.\n        | thicket +-----+   copse   +---+  cabin  |\n        '----+----'     '-----------'   '---------'\n             |\n        .----+----.\n        |   den   |\n        '---------'\n\n     .---------.   .---------.   .---------.   .---------.\n     | spring  +---+  shore  +---+ grotto  |   |overlook |\n     '---------'   '---------'   '---------'   '---------'\n\n     .-------------.                                  .------------.\n     | Holding_cell |   the jail: no doors, no exits   | Concourse  |\n     '-------------'                                   | Connects   |\n                                                       | all points |\n                          .----------.                 '------------'\n                          | Backroom |  staff only\n                          '----------'\n\n              every room also opens on the concourse",
+ "start_room": "atrium",
+ "jail_room": "holding_cell",
+ "rooms": {
+  "atrium": {
+   "name": "atrium",
+   "description": "The atrium is where everyone arrives, and it has the worn look of a place\nthat knows it. A wide floor of pale stone, a ceiling too high to make out,\nand doorways on every side standing open. Somebody has left a coat over the\nback of a chair nobody is sitting in.\n\nVoices carry here. They do not carry out.",
+   "lockable": false,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "gallery",
+    "oak",
+    "plaza",
+    "orchard",
+    "concourse"
+   ],
+   "look_exits": [
+    "gallery",
+    "oak",
+    "plaza",
+    "orchard",
+    "concourse"
+   ],
+   "adjacent_to": [
+    "concourse",
+    "gallery",
+    "oak",
+    "orchard",
+    "plaza"
+   ]
+  },
+  "backroom": {
+   "name": "backroom",
+   "description": "A small room behind the front of the house: a kettle, a table, three\nmismatched chairs and a corkboard nobody has tidied since spring. This is\nwhere the people who keep the place running come to stop keeping it running\nfor ten minutes.",
+   "lockable": false,
+   "staff_only": true,
+   "hub": false,
+   "toml_exits": [],
+   "look_exits": [],
+   "adjacent_to": []
+  },
+  "cabin": {
+   "name": "cabin",
+   "description": "One room, one window, one chimney doing its best. Firewood stacked with\ncare along the whole of the south wall, and a bolt on the inside of the\ndoor.",
+   "lockable": true,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "copse",
+    "concourse"
+   ],
+   "look_exits": [
+    "copse",
+    "concourse"
+   ],
+   "adjacent_to": [
+    "concourse",
+    "copse"
+   ]
+  },
+  "concourse": {
+   "name": "concourse",
+   "description": "A long curved corridor with a door to everywhere, each one labelled in a\nsmall neat hand. It is not a room anybody stays in. It is the room you pass\nthrough on the way to the one you meant.",
+   "lockable": false,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "shore",
+    "rotunda",
+    "plaza",
+    "cabin",
+    "hall",
+    "lawn",
+    "refectory",
+    "thicket",
+    "orchard",
+    "den",
+    "overlook",
+    "gallery",
+    "glade",
+    "grotto",
+    "spring",
+    "atrium",
+    "lodge",
+    "stall",
+    "parlour",
+    "mirror_hall",
+    "oak",
+    "rampart",
+    "copse"
+   ],
+   "look_exits": [
+    "shore",
+    "rotunda",
+    "plaza",
+    "cabin",
+    "hall",
+    "lawn",
+    "refectory",
+    "thicket",
+    "orchard",
+    "den",
+    "overlook",
+    "gallery",
+    "glade",
+    "grotto",
+    "spring",
+    "atrium",
+    "lodge",
+    "stall",
+    "parlour",
+    "mirror_hall",
+    "oak",
+    "rampart",
+    "copse"
+   ],
+   "adjacent_to": [
+    "atrium",
+    "cabin",
+    "copse",
+    "den",
+    "gallery",
+    "glade",
+    "grotto",
+    "hall",
+    "lawn",
+    "lodge",
+    "mirror_hall",
+    "oak",
+    "orchard",
+    "overlook",
+    "parlour",
+    "plaza",
+    "rampart",
+    "refectory",
+    "rotunda",
+    "shore",
+    "spring",
+    "stall",
+    "thicket"
+   ]
+  },
+  "copse": {
+   "name": "copse",
+   "description": "A stand of young trees, thin and close and all the same age, as though\nthey had all agreed to start together. The light comes through in bars and\nthe ground is bare.",
+   "lockable": false,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "cabin",
+    "thicket",
+    "oak",
+    "concourse"
+   ],
+   "look_exits": [
+    "cabin",
+    "thicket",
+    "oak",
+    "concourse"
+   ],
+   "adjacent_to": [
+    "cabin",
+    "concourse",
+    "oak",
+    "thicket"
+   ]
+  },
+  "den": {
+   "name": "den",
+   "description": "A hollow under a bank, roofed with roots and floored with dry leaf.\nSomething lives here. It is out. It has clearly been out for some time,\nwhich is the only reason you are still standing in the doorway.",
+   "lockable": false,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "thicket",
+    "concourse"
+   ],
+   "look_exits": [
+    "thicket",
+    "concourse"
+   ],
+   "adjacent_to": [
+    "concourse",
+    "thicket"
+   ]
+  },
+  "gallery": {
+   "name": "gallery",
+   "description": "A long room hung with pictures of rooms. Some of them you recognise. One\nof them is this one, painted from where you are standing, which is either a\ncompliment or a warning.",
+   "lockable": false,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "mirror_hall",
+    "atrium",
+    "lawn",
+    "lodge",
+    "concourse"
+   ],
+   "look_exits": [
+    "mirror_hall",
+    "atrium",
+    "lawn",
+    "lodge",
+    "concourse"
+   ],
+   "adjacent_to": [
+    "atrium",
+    "concourse",
+    "lawn",
+    "lodge",
+    "mirror_hall"
+   ]
+  },
+  "glade": {
+   "name": "glade",
+   "description": "A clearing in the trees where the light comes down in one soft column.\nThe grass is flattened in a ring, as if something large had slept here and\nthen thought better of mentioning it.",
+   "lockable": false,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "parlour",
+    "orchard",
+    "concourse"
+   ],
+   "look_exits": [
+    "parlour",
+    "orchard",
+    "concourse"
+   ],
+   "adjacent_to": [
+    "concourse",
+    "orchard",
+    "parlour"
+   ]
+  },
+  "grotto": {
+   "name": "grotto",
+   "description": "A low cave at the waterline, floored with wet shingle and lit green from\nbelow. The tide has left things here in rows, sorted by size, as if\nsomething patient had been doing the sorting.",
+   "lockable": true,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "spring",
+    "shore",
+    "concourse"
+   ],
+   "look_exits": [
+    "spring",
+    "shore",
+    "concourse"
+   ],
+   "adjacent_to": [
+    "concourse",
+    "shore",
+    "spring"
+   ]
+  },
+  "hall": {
+   "name": "hall",
+   "description": "A high panelled hall with a long table down the middle and a gallery\nabove. It is set up for something formal, and has been for years. Nobody\nremembers what.",
+   "lockable": false,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "plaza",
+    "oak",
+    "concourse"
+   ],
+   "look_exits": [
+    "plaza",
+    "oak",
+    "concourse"
+   ],
+   "adjacent_to": [
+    "concourse",
+    "oak",
+    "plaza"
+   ]
+  },
+  "holding_cell": {
+   "name": "holding cell",
+   "description": "Four walls, a bench, and a window set too high to see anything through but\nweather. The door is on the other side of the wall from you.\n\nSomebody will come. They usually do.",
+   "lockable": false,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [],
+   "look_exits": [],
+   "adjacent_to": []
+  },
+  "lawn": {
+   "name": "lawn",
+   "description": "A flat green lawn, mown in stripes by somebody with strong opinions about\nstripes. Hoops are set out for a game whose rules were last written down a\nlong time ago and have been improved since.",
+   "lockable": false,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "gallery",
+    "plaza",
+    "concourse"
+   ],
+   "look_exits": [
+    "gallery",
+    "plaza",
+    "concourse"
+   ],
+   "adjacent_to": [
+    "concourse",
+    "gallery",
+    "plaza"
+   ]
+  },
+  "lodge": {
+   "name": "lodge",
+   "description": "A small house of one room and a great many hooks. Boots by the door,\nkettle on, a chair drawn up close to the stove. Everything in it is the\nright size for somebody slightly smaller than you.",
+   "lockable": true,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "gallery",
+    "orchard",
+    "concourse"
+   ],
+   "look_exits": [
+    "gallery",
+    "orchard",
+    "concourse"
+   ],
+   "adjacent_to": [
+    "concourse",
+    "gallery",
+    "orchard"
+   ]
+  },
+  "mirror_hall": {
+   "name": "mirror hall",
+   "description": "                    A hall of facing mirrors.\n                 Every wall repeats every wall.\n              Step forward and a hundred of you agree.\n                 Step back and they agree again.\n\n              The writing on the far wall is reversed,\n                and reads better if you don't try.",
+   "lockable": false,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "rampart",
+    "rotunda",
+    "gallery",
+    "stall",
+    "concourse"
+   ],
+   "look_exits": [
+    "rampart",
+    "rotunda",
+    "gallery",
+    "stall",
+    "concourse"
+   ],
+   "adjacent_to": [
+    "concourse",
+    "gallery",
+    "rampart",
+    "rotunda",
+    "stall"
+   ]
+  },
+  "oak": {
+   "name": "oak",
+   "description": "One enormous tree standing on its own, with a bench round the trunk and\ninitials cut into the bark going back further than the bench does. The\ncanopy is its own weather.",
+   "lockable": false,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "atrium",
+    "hall",
+    "copse",
+    "thicket",
+    "parlour",
+    "concourse"
+   ],
+   "look_exits": [
+    "atrium",
+    "hall",
+    "copse",
+    "thicket",
+    "parlour",
+    "concourse"
+   ],
+   "adjacent_to": [
+    "atrium",
+    "concourse",
+    "copse",
+    "hall",
+    "parlour",
+    "thicket"
+   ]
+  },
+  "orchard": {
+   "name": "orchard",
+   "description": "Old trees in rows that have stopped being rows, standing in long grass.\nWindfalls underfoot. Whatever was planted here was planted by somebody who\ndid not expect to eat from it.",
+   "lockable": false,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "lodge",
+    "atrium",
+    "glade",
+    "spring",
+    "concourse"
+   ],
+   "look_exits": [
+    "lodge",
+    "atrium",
+    "glade",
+    "spring",
+    "concourse"
+   ],
+   "adjacent_to": [
+    "atrium",
+    "concourse",
+    "glade",
+    "lodge",
+    "spring"
+   ]
+  },
+  "overlook": {
+   "name": "overlook",
+   "description": "A shelf of rock with the whole valley laid out below it and nothing at all\nbetween you and the drop. A good place to sit and be quiet at.",
+   "lockable": false,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "spring",
+    "concourse"
+   ],
+   "look_exits": [
+    "spring",
+    "concourse"
+   ],
+   "adjacent_to": [
+    "concourse",
+    "spring"
+   ]
+  },
+  "parlour": {
+   "name": "parlour",
+   "description": "A long table under an awning, laid for far more people than are ever here\nat once, and never cleared. The teapot is warm. Nobody admits to having\nmade it.",
+   "lockable": false,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "oak",
+    "glade",
+    "concourse"
+   ],
+   "look_exits": [
+    "oak",
+    "glade",
+    "concourse"
+   ],
+   "adjacent_to": [
+    "concourse",
+    "glade",
+    "oak"
+   ]
+  },
+  "plaza": {
+   "name": "plaza",
+   "description": "A wide paved square laid out in black and white, big enough that crossing\nit feels like a decision. Benches at the edges. In the middle, nothing at\nall, which is the point of a plaza.",
+   "lockable": false,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "atrium",
+    "lawn",
+    "hall",
+    "refectory",
+    "concourse"
+   ],
+   "look_exits": [
+    "atrium",
+    "lawn",
+    "hall",
+    "refectory",
+    "concourse"
+   ],
+   "adjacent_to": [
+    "atrium",
+    "concourse",
+    "hall",
+    "lawn",
+    "refectory"
+   ]
+  },
+  "rampart": {
+   "name": "rampart",
+   "description": "A broad stone wall wide enough to walk two abreast along the top of, with\na parapet on the outward side and a long drop on the other. It defends\nnothing any more and does it very well.",
+   "lockable": false,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "rotunda",
+    "mirror_hall",
+    "concourse"
+   ],
+   "look_exits": [
+    "rotunda",
+    "mirror_hall",
+    "concourse"
+   ],
+   "adjacent_to": [
+    "concourse",
+    "mirror_hall",
+    "rotunda"
+   ]
+  },
+  "refectory": {
+   "name": "refectory",
+   "description": "Trestle tables, benches, and the particular echo of a room built for\neating in. It smells faintly and permanently of bread.",
+   "lockable": false,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "plaza",
+    "concourse"
+   ],
+   "look_exits": [
+    "plaza",
+    "concourse"
+   ],
+   "adjacent_to": [
+    "concourse",
+    "plaza"
+   ]
+  },
+  "rotunda": {
+   "name": "rotunda",
+   "description": "A round room with no corners to argue in, which has not stopped anybody.\nThe floor is a circle worn smooth by people walking round it while\ndisagreeing, and the acoustics are unforgiving.",
+   "lockable": false,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "rampart",
+    "mirror_hall",
+    "concourse"
+   ],
+   "look_exits": [
+    "rampart",
+    "mirror_hall",
+    "concourse"
+   ],
+   "adjacent_to": [
+    "concourse",
+    "mirror_hall",
+    "rampart"
+   ]
+  },
+  "shore": {
+   "name": "shore",
+   "description": "A long grey beach of small flat stones that shift and click underfoot.\nThe water arrives without much conviction and leaves again. Somebody has\nbuilt a cairn and somebody else has knocked most of it over.",
+   "lockable": false,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "spring",
+    "grotto",
+    "concourse"
+   ],
+   "look_exits": [
+    "spring",
+    "grotto",
+    "concourse"
+   ],
+   "adjacent_to": [
+    "concourse",
+    "grotto",
+    "spring"
+   ]
+  },
+  "spring": {
+   "name": "spring",
+   "description": "Water comes up out of the rock here, cold enough to hurt, and goes away\ndownhill in a hurry. There is a stone lip worn into a seat by people who\ncame to fill something and stayed.",
+   "lockable": false,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "orchard",
+    "stall",
+    "overlook",
+    "shore",
+    "grotto",
+    "concourse"
+   ],
+   "look_exits": [
+    "orchard",
+    "stall",
+    "overlook",
+    "shore",
+    "grotto",
+    "concourse"
+   ],
+   "adjacent_to": [
+    "concourse",
+    "grotto",
+    "orchard",
+    "overlook",
+    "shore",
+    "stall"
+   ]
+  },
+  "stall": {
+   "name": "stall",
+   "description": "A shopfront barely wider than its door, with shelves to the ceiling and\none of everything on them. The proprietor is elsewhere. A hand-lettered\ncard says BACK SHORTLY and has faded almost white.",
+   "lockable": true,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "mirror_hall",
+    "spring",
+    "concourse"
+   ],
+   "look_exits": [
+    "mirror_hall",
+    "spring",
+    "concourse"
+   ],
+   "adjacent_to": [
+    "concourse",
+    "mirror_hall",
+    "spring"
+   ]
+  },
+  "thicket": {
+   "name": "thicket",
+   "description": "Close-grown scrub, thorn and bramble, with a path through it that is more\nof a rumour. Things move alongside you at about knee height and decline to\nbe seen.",
+   "lockable": false,
+   "staff_only": false,
+   "hub": false,
+   "toml_exits": [
+    "den",
+    "copse",
+    "oak",
+    "concourse"
+   ],
+   "look_exits": [
+    "den",
+    "copse",
+    "oak",
+    "concourse"
+   ],
+   "adjacent_to": [
+    "concourse",
+    "copse",
+    "den",
+    "oak"
+   ]
+  }
+ }
+}

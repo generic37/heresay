@@ -1,0 +1,304 @@
+# config.toml.example — Heresay, the whole of what an install has to decide.
+#
+# Copy this file to config.toml and edit it. ⛔ It will NOT run as it ships:
+# every value you must choose for yourself is a [bracketed] placeholder, and
+# the house REFUSES TO BOOT while one is left in, naming the key it found. That
+# is deliberate — an unconfigured house that opens is worse than one that does
+# not, because nobody notices.
+#
+# The placeholders in this file:
+#
+#     source_url      where THIS house's source can be had (AGPL §13)
+#     instance_name   what the house calls itself on screen
+#     house_dir       the authored content root — world/, help/, greeting.txt …
+#     [state_dir]/…   the six runtime state paths
+#     owner           the account name that owns this house
+#     cert_file/key_file   the TLS door's certificate and key
+#
+# ⚡ THIS FILE IS THE ONLY ONE YOU MUST EDIT. Fill in the placeholders here and
+# the house opens; nothing else has to be touched to get a working instance.
+#
+# Everything else here already has a working value. Read the comments, change
+# what you want, and leave the rest alone.
+#
+# ⚠ PATHS RESOLVE AGAINST THIS FILE'S OWN DIRECTORY. If config.toml lives in
+# /etc/heresay/ then a relative path resolves under /etc/heresay/ — which is
+# almost never what you meant for state. Use ABSOLUTE paths on a real server.
+
+
+# ⛔ AGPL §13 — where the source of THIS house can be had. The licence obliges
+# an operator running a modified Heresay as a network service to offer its users
+# the corresponding source, and a repository somebody else can find is not an
+# offer to a user standing at a text prompt. `.source` prints this beside the
+# running version. If you have not modified the engine, point it at wherever you
+# got it.
+source_url = "[source_url]"
+
+
+[listeners]
+# The PUBLIC door: TLS, plain UTF-8 lines. 2323 is above 1024, so the daemon
+# binds it without root. `0.0.0.0` means every interface, which is what a public
+# door wants.
+tls_host = "0.0.0.0"
+tls_port = 2323
+
+# ⛔ The PLAINTEXT door — loopback ONLY, and it must stay that way. It exists so
+# the operator can reach the house from the machine itself (`ssh <host>`, then
+# telnet 127.0.0.1 2324), and it is how the very first account is made on a
+# fresh box. NEVER bind this to a public address: it carries passwords in clear.
+plain_host = "127.0.0.1"
+plain_port = 2324
+
+# ⛔ The WEB door — loopback ONLY, for the same reason: a reverse proxy (Caddy,
+# nginx) terminates TLS in front of it and proxies wss://<your-domain>/ws here.
+# See deploy/install/Caddyfile.example.
+ws_host = "127.0.0.1"
+ws_port = 8765
+
+# Trust an X-Forwarded-For header ONLY when the socket peer is this address —
+# i.e. your own proxy — so per-IP limits see the real client instead of counting
+# every browser as one machine. Empty string = trust nobody and use the socket
+# peer verbatim, which is the safe default if you are not behind a proxy.
+trusted_proxy = "127.0.0.1"
+
+
+[cert]
+# The TLS door's certificate and key, and nothing else (which is why the section
+# is [cert] and not [tls]). On a real host these are usually copies of the
+# certificate your reverse proxy already obtains for the domain; see
+# deploy/install/README.md for the copy-and-restart-on-renewal timer.
+#
+# For LOCAL development, `make cert` writes a self-signed pair into certs/ and
+# these two lines become certs/cert.pem and certs/key.pem.
+cert_file = "[tls_cert_path]"
+key_file  = "[tls_key_path]"
+
+
+[storage]
+# ⛔ ONE content root. Everything authored — world/, help/, greeting.txt,
+# agreement.txt, reboot.txt, theme.toml — is found underneath it by its standard
+# name, so this is normally the only content path you ever set. The shipped
+# skeleton is the `house/` directory beside this file; on a server it is usually
+# something like /opt/heresay/house.
+house_dir = "[house_dir]"
+
+# ⛔ The six runtime state paths. These are files the DAEMON writes — accounts,
+# encrypted mail, bans, switches, the event log — and they belong somewhere the
+# daemon owns and nothing else does (a real deployment: /var/lib/heresay, mode
+# 0700, owned by the service user). They must NOT live under house_dir: a
+# content deploy replaces that directory wholesale.
+accounts_file = "[state_dir]/accounts.json"
+mail_file     = "[state_dir]/mailboxes.json"
+mail_key_file = "[state_dir]/mail.key"
+revtell_file  = "[state_dir]/revtells.json"
+bans_file     = "[state_dir]/bans.json"
+state_file    = "[state_dir]/state.json"
+
+# The rest of the state paths default BESIDE bans_file, which is what you want:
+# events.jsonl (the operational event log), resume.json ("remember me" tokens),
+# ban_history.json and control.sock. Name one here only to move it.
+# events_file      = "[state_dir]/events.jsonl"
+# resume_file      = "[state_dir]/resume.json"
+# ban_history_file = "[state_dir]/ban_history.json"
+
+# ⚠ Who may run what is CONFIG, not state — you edit it, the daemon only ever
+# reads it. Left unset it resolves BESIDE this file, which is what you want.
+# Write it once with `python -m heresay --write-permissions` (as root, from the
+# install directory); the daemon fills in anything absent in memory and picks up
+# your edits within seconds of saving.
+# permissions_file = "permissions.toml"
+
+# Names you will not have registered — impersonation bait, `admin`, a brand you
+# would rather not host. One name per line, `#` for comments. Same rules as
+# above: beside this file, read-only to the daemon, absent means the empty list.
+# The engine already reserves every rank name and the owner's account name on
+# its own; this is your list, added to those.
+# forbidden_names_file = "forbidden_names.txt"
+
+
+[moderation]
+# ⛔ REQUIRED — the account name that OWNS this house: the single protected,
+# un-bannable supreme account. It is an identity, not a rank: whoever logs in
+# under this name holds the top level whatever is stored against them.
+#
+# On a fresh house, set it to the name you are ABOUT to register, then make that
+# account through the loopback plaintext door. ⚠ Getting this wrong is not
+# cosmetic — if it names an account that does not exist, the first person to
+# register that name becomes the owner.
+owner = "[owner_name]"
+
+# Which LEVEL a new account lands in: newb, resident or staff. Never owner (that
+# is a boot error). `resident` is the ordinary open house; `newb` gives you a
+# probationary tier to vet people out of, and is only meaningful if your
+# theme.toml ladder actually has a rung below the resident anchor.
+landing_level = "resident"
+
+# `.ban <name> [hours]` — the default when no hours are given.
+ban_default_hours = 24
+# `.ban_ip` has its own default: banning an ADDRESS is the blunter tool (it can
+# catch a household, a campus, a phone carrier's NAT), so it can be kept short
+# without shortening account bans. It shows what it would catch, then asks.
+ban_ip_default_hours = 24
+# How long the ban HISTORY is kept — every ban ever placed, so "has this
+# happened before?" survives the ban itself expiring. 0 = forever (the default).
+# It is the one file that holds an address; no command ever prints one.
+ban_history_days = 0
+# The ceiling on any single ban, in hours (8760 = a year).
+ban_max_hours = 8760
+
+
+[mail]
+# Mail is the one thing this engine keeps, and only because it is addressed and
+# consented: one person deliberately asked the server to hold specific words for
+# one named recipient. It is encrypted at rest with mail_key_file.
+mailbox_cap = 50
+purge_days = 180
+# ⚠ Reports (`.report` / `.read_report`) age on their OWN number, not mail's.
+# There is deliberately no way to delete a report, so this is a report's whole
+# lifetime in the house.
+#
+# ⛔ MATCH IT TO event_retention_days (10), and think before raising it. At
+# filing, the daemon writes the WHOLE report — reporter, accused, text, both
+# account records and every event-log row about either of them — to one file in
+# the state directory, kept for report_capture_days (375). THAT is the record.
+# The copy in the report box is only the unread notice, so a longer number here
+# does not preserve anything: it leaves an accusation readable in-world for
+# months after the connections, logins and addresses that would let anyone
+# check it have aged out of the event log.
+report_retention_days = 10
+send_burst = 3
+send_refill_per_sec = 0.05
+profile_max_lines = 20
+mail_max_lines = 40
+
+
+[world]
+# ⛔ REQUIRED — the name of THIS house. It is what the engine calls the instance
+# in every line it generates: `.version`, the `.map` title, the `.examine` owner
+# line, the login notices, and the browser tab's title. It lives HERE, with the
+# rest of what an install decides, so that configuring a house is one file.
+instance_name = "[instance_name]"
+
+# ⛔ REQUIRED — the room arrivals land in. It must name a room that exists in
+# <house_dir>/world/rooms/; the server refuses to start otherwise, and there is
+# no fallback world. The shipped skeleton has exactly one room, `void`.
+entry_room = "void"
+
+# Optional. The room `.jail` sends people to. Unset (as here) means `.jail`
+# answers "No jail location set." and changes nothing — so authoring a jail room
+# and naming it here is the second thing to do after writing a real world.
+# jail_room = "holding_cell"
+
+# The wide screen's column count. The narrow (phone) layout is a flat 40 and is
+# not configurable — those screens are hand-set tables, not fluid boxes.
+wrap_columns = 78
+
+# How long the entry room remembers what was said in it (`.rev`), and how many
+# lines at most. ⚠ Changing rev_window_minutes changes what agreement.txt SAYS
+# — the document quotes it — which means every resident re-consents at their
+# next login. That is deliberate; a consent document may not describe a rule the
+# server has stopped enforcing.
+# rev_window_minutes = 30
+# rev_max_lines = 100
+# revtell_count = 20
+
+# How long the operational event log keeps a fact (connections, refusals, staff
+# actions). One window for every type. 0 keeps everything. ⚠ Also quoted by
+# agreement.txt — same re-consent consequence as above.
+# event_retention_days = 10
+
+# Reconnect inside this many seconds and the room sees no exit/enter churn and
+# you land back where you were standing. 120 by default: a phone losing signal,
+# or a browser discarding a backgrounded tab, should not read as leaving.
+# disconnect_grace_seconds = 120
+
+# How often the engine re-reads the files it watches (permissions.toml,
+# config.toml, and everything under house_dir), in seconds. 0 switches the
+# watcher off entirely and makes every change a restart.
+# reload_poll_seconds = 3
+
+# The warning marks, in seconds before the event, that `--restart-countdown`
+# broadcasts. The FIRST one is the total wait.
+# restart_checkpoints = [120, 60, 10]
+
+
+[invite]
+burst = 3
+refill_per_sec = 0.0333
+ttl_seconds = 300
+
+
+[ratelimit]
+# Speech, emotes, thinks and tells share ONE bucket, so switching verbs cannot
+# evade it. Generous enough that a fast human in a lively room never sees it.
+speech_burst = 5
+speech_refill_per_sec = 1.0
+speech_mute_strikes = 5
+speech_disconnect_strikes = 15
+speech_mute_seconds = 10.0
+shout_per_seconds = 30.0
+
+# Per-IP concurrency and churn. ⚠ 3 is right when every client has its own
+# public address. Raise it if your users are behind one NAT (a school, an
+# office, your own LAN), or they will lock each other out.
+max_conns_per_ip = 3
+churn_window_seconds = 10.0
+churn_max_in_window = 5
+
+# Exponential backoff after a failed login, per address.
+auth_backoff_base = 1.0
+auth_backoff_cap = 30.0
+
+# Pre-auth deadline (anti-slowloris): how long a connection has to finish
+# logging in or making an account. Authenticated sessions are NEVER reaped by
+# this — there is no idle timeout in this engine and there will not be one.
+auth_phase_seconds = 60.0
+# Reading the agreement gets its own, equally finite clock: it is a document,
+# not a prompt, and at 60s a careful reader was dropped mid-clause. The
+# credential clock above PAUSES while it is on screen and resumes with exactly
+# what it had left.
+agreement_seconds = 300.0
+
+# Per-session governor over ALL dotted commands, so no logged-in client can spam
+# handler or disk work. Humans never reach it.
+command_burst = 20
+command_refill_per_sec = 5.0
+
+# Per-IP account-registration limit: a small burst, then a slow refill, bounding
+# how fast accounts.json can grow from one address.
+registration_burst = 3
+registration_refill_per_sec = 0.008333   # 3, then ~1 per 120s
+
+# Cap on one session's personal `.mute` list (bounds per-session memory).
+mute_cap = 100
+
+# Server-WIDE failed-auth ceiling. It counts every failed login and recovery
+# attempt across ALL sources, because that is the thing per-IP backoff cannot
+# see: a distributed guessing run from a thousand addresses. Over-threshold
+# failures inside the window trip a cooldown that slows new auth attempts and
+# pauses new-account creation; authenticated sessions are untouched. ⚠ It is a
+# deliberate self-DoS tradeoff — somebody can trip it on purpose to shut your
+# door for `cooldown` seconds — hence switchable off and tuned high.
+global_auth_enabled = true
+global_auth_fail_window_seconds = 60
+global_auth_fail_threshold = 50
+global_auth_cooldown_seconds = 120
+
+
+[keepalive]
+# TCP keepalives on the socket doors, so a half-open connection (a laptop lid
+# closed, Wi-Fi gone, a NAT that forgot) is detected and closed rather than
+# leaving a ghost the server believes is present. ~3-4 minutes at these values.
+# ⛔ This is DEAD-PEER detection, not idle reaping: a live but silent human is
+# never disconnected.
+# tcp_keepidle = 120
+# tcp_keepintvl = 20
+# tcp_keepcnt = 4
+
+
+[reboot]
+# `.reboot` is theatre — a staged boot sequence shown only to whoever typed it.
+# The script is <house_dir>/reboot.txt; a missing file simply makes it a no-op.
+# pause_budget caps the total scripted wait, in seconds.
+# rate_seconds = 60
+# pause_budget = 240

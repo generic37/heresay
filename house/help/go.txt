@@ -1,0 +1,8 @@
+.go — move
+
+.go <room> walks through a connecting door; .look shows the exits.
+Unambiguous prefixes work, so the first few letters of a room name
+are enough. Some houses keep a hub room that opens on everywhere —
+ride it when the geography is against you. Locked doors refuse
+politely; if you believe you're welcome ask for an .invite.
+Shortcut: .g

@@ -1,0 +1,13 @@
+# Daily, jittered. Neither thing it checks moves fast — a disk fills over months
+# and a cert expires on a schedule — so the exact hour does not matter and
+# RandomizedDelaySec keeps a fleet from probing at the same instant.
+[Unit]
+Description=Run heresay host health check daily
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+RandomizedDelaySec=30m
+
+[Install]
+WantedBy=timers.target

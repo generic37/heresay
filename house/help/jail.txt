@@ -1,0 +1,10 @@
+.jail — confine someone to the jail room (staff)
+
+  .jail <name>    move them there and hold them
+
+PERSISTENT: it survives a relog and a restart, so they log straight back
+into the jail room. Held by the flag, not by the room's lack of doors — no
+.go, .join, .shout, .tell, .remote, .invite or outbound .mail. They CAN
+speak in the jail room, and CAN .call_staff or .mail_staff to appeal;
+staff can reach them by tell. With no jail room configured this says so
+and does nothing. Logged as a fact.

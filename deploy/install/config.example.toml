@@ -1,0 +1,161 @@
+# Production config for your.domain.example — REFERENCE COPY (edit for your host).
+#
+# The AUTHORITATIVE file lives on the server at /etc/heresay/config.toml
+# (owned root:heresay, mode 640). This copy is committed only so the deployment is
+# reproducible; deploy.sh never overwrites the server's /etc/heresay/config.toml.
+#
+# All paths are ABSOLUTE (this file is read from /etc/heresay/, so relative paths
+# would resolve there — state must live under /var/lib/heresay instead).
+
+# ⛔ AGPL §13 — where THIS house's source can be had (v1.50.0). `.source` prints
+# it beside the running version. A public instance MUST set this: the licence
+# obliges an operator running a modified Heresay as a network service to offer
+# its users the corresponding source, and a repository somebody else can find is
+# not an offer to a user standing at a text prompt. Unset, `.source` says so
+# plainly rather than naming an upstream this house may no longer match.
+source_url = "https://example.invalid/your-heresay-fork"
+
+[listeners]
+# Public TLS door. 2323 is > 1024, so the daemon binds it without root.
+tls_host = "0.0.0.0"
+tls_port = 2323
+# Plaintext door — operator only, reached via `ssh <your-host>` then telnet.
+plain_host = "127.0.0.1"
+plain_port = 2324
+# WebSocket door — Caddy reverse-proxies wss://.../ws here. Loopback only.
+ws_host = "127.0.0.1"
+ws_port = 8765
+# Trust X-Forwarded-For only from the local Caddy proxy, so per-IP limits see
+# the real client.
+trusted_proxy = "127.0.0.1"
+
+[cert]
+# The TLS door's certificate and key — just the two files (the door itself is
+# configured in [listeners]).
+# The :2323 door reuses the domain's LE cert; heresay-cert-copy.timer keeps these
+# in sync with Caddy's store and restarts heresay on renewal.
+cert_file = "/etc/heresay/tls/fullchain.pem"
+key_file = "/etc/heresay/tls/privkey.pem"
+
+[storage]
+# ONE content root. Everything authored — agreement.txt, world/, help/,
+# greeting.txt, reboot.txt, theme.toml — is found under it by its standard name,
+# so this is normally the only content path a deployment sets. MUST be absolute
+# here: this file is read from /etc/heresay/, and a relative value would resolve
+# there rather than in the deployed repo copy.
+house_dir = "/opt/heresay/house"
+# All runtime state lives under /var/lib/heresay (owned heresay, 700).
+accounts_file = "/var/lib/heresay/accounts.json"
+mail_file = "/var/lib/heresay/mailboxes.json"
+mail_key_file = "/var/lib/heresay/mail.key"
+revtell_file = "/var/lib/heresay/revtells.json"
+bans_file = "/var/lib/heresay/bans.json"
+state_file = "/var/lib/heresay/state.json"
+# ⚠ Who may run what is NOT state — it is config you edit, so it lives HERE,
+# beside this file, and the daemon never rewrites it. Left unset it defaults to
+# /etc/heresay/permissions.toml, which is what you want; it is written on first
+# boot, complete, and reloaded live when you change it.
+# permissions_file = "/etc/heresay/permissions.toml"
+# The engine's operational event log (facts only, never message content).
+events_file = "/var/lib/heresay/events.jsonl"
+# "Remember me" tokens (hashed, web door only). Would default beside bans_file
+# anyway; named here because every other state path is.
+resume_file = "/var/lib/heresay/resume.json"
+# The authored content needs no further keys: world/, agreement.txt,
+# greeting.txt, reboot.txt, theme.toml and help/ all resolve under house_dir.
+# Set a per-file key only to rename or nest one (e.g. world_dir = "worlds/summer").
+
+[moderation]
+# ⛔ REQUIRED — the house refuses to boot until this names your owner account.
+# It ships as the placeholder below; set it to the account name that owns this
+# house (the single protected supreme account). (`arch` is the pre-v1.54 key and
+# is still read, for configs written before the rename.)
+owner = "[owner_name]"
+# Which LEVEL a new account lands in: newb, resident or staff (never owner).
+landing_level = "newb"
+ban_default_hours = 24
+# `.ban_ip` has its own default: banning an ADDRESS is the blunter tool (it can
+# catch a household, a campus, a carrier's NAT), so it can be kept short without
+# shortening account bans. It shows what it would catch, then asks.
+ban_ip_default_hours = 24
+# How long the ban HISTORY is kept — every ban ever placed, so "has this
+# happened before?" survives the ban expiring. 0 = forever (the default).
+# It is the one file holding an address; nothing ever prints one.
+ban_history_days = 0
+ban_max_hours = 8760
+
+[mail]
+mailbox_cap = 50
+purge_days = 180
+# ⚠ Reports age on their OWN number, not mail's. ⛔ Match it to
+# event_retention_days (10): the RECORD of a report is the capture file the
+# daemon writes at filing (kept report_capture_days), not the copy in the box,
+# so a longer number here only leaves an accusation readable in-world after the
+# evidence that would let anyone check it has aged out. See `.report`.
+report_retention_days = 10
+send_burst = 3
+send_refill_per_sec = 0.05
+profile_max_lines = 20
+mail_max_lines = 40
+
+[world]
+# REQUIRED: the name this house calls itself on screen.
+instance_name = "[instance_name]"
+# REQUIRED: the room arrivals land in. It must name a room that exists in
+# world/rooms/ — the server refuses to start otherwise, and there is no fallback
+# world. jail_room is optional; unset means .jail says "No jail location set."
+entry_room = "void"
+wrap_columns = 78
+# disconnect_grace_seconds defaults to 120: reconnect inside it and the room sees
+# no exit/enter churn and you land back in the same room. Raised from 60 in
+# v1.24.0 — a phone losing signal, or a browser discarding a backgrounded tab,
+# should not read as leaving. Set it here only to choose a different window.
+
+[invite]
+burst = 3
+refill_per_sec = 0.0333
+ttl_seconds = 300
+
+[ratelimit]
+speech_burst = 5
+speech_refill_per_sec = 1.0
+speech_mute_strikes = 5
+speech_disconnect_strikes = 15
+speech_mute_seconds = 10.0
+shout_per_seconds = 30.0
+# Each client has its own public IP in production, so a small per-IP cap is right
+# (the LAN portproxy pooling that forced 10 in dev doesn't apply here).
+max_conns_per_ip = 3
+churn_window_seconds = 10.0
+churn_max_in_window = 5
+auth_backoff_base = 1.0
+auth_backoff_cap = 30.0
+# --- v1.9.0 hardening dials ---
+# Pre-auth phase deadline (anti-slowloris): seconds a connection has to finish
+# logging in / creating an account before it's closed. Authenticated sessions
+# are never reaped by this (the no-idle-reaping policy for presence stays).
+auth_phase_seconds = 60.0
+# Reading the agreement gets its own, equally finite clock: it is a document,
+# not a prompt, and at 60s a careful reader was dropped mid-clause. The
+# credential clock above PAUSES while the agreement is on screen and resumes
+# with exactly what it had left. Both paths use it (creation + re-consent).
+agreement_seconds = 300.0
+# Per-session command governor: a generous token bucket over ALL dotted commands
+# so no logged-in client can spam handler/disk work. Humans never hit it.
+command_burst = 20
+command_refill_per_sec = 5.0
+# Per-IP account-registration flood limit: a small burst, then a slow refill,
+# bounding how fast accounts.json can grow from one address.
+registration_burst = 3
+registration_refill_per_sec = 0.008333   # 3, then ~1 per 120s (1/120)
+# Cap on a session's personal .mute list (bounds per-session memory growth).
+mute_cap = 100
+# Server-WIDE failed-auth ceiling (blunts distributed/botnet guessing that per-IP
+# backoff can't see: it counts every failed login AND recovery attempt across all
+# sources). Over-threshold failures within the window trip a cooldown that slows
+# new auth attempts and pauses new-account creation; authenticated sessions are
+# untouched. A deliberate self-DoS tradeoff, hence switchable off + tuned high.
+global_auth_enabled = true
+global_auth_fail_window_seconds = 60
+global_auth_fail_threshold = 50
+global_auth_cooldown_seconds = 120

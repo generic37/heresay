@@ -1,0 +1,14 @@
+# Monthly. No fixed hour: `monthly` is the 1st at 00:00 UTC, and
+# RandomizedDelaySec spreads the fetch so a fleet of boxes does not all knock on
+# the advisory database at the same second. Persistent=true so a box that was
+# off on the 1st still runs it once when it comes back.
+[Unit]
+Description=Monthly heresay dependency CVE scan
+
+[Timer]
+OnCalendar=monthly
+Persistent=true
+RandomizedDelaySec=1h
+
+[Install]
+WantedBy=timers.target

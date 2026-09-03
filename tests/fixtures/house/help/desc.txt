@@ -1,0 +1,11 @@
+.desc — your one line
+
+.desc <text> sets the phrase that follows your name in .who and
+.examine. With the information from .profile it is what strangers
+can see of you.
+
+.desc on its own SHOWS you what yours says. If the words are your
+own it then asks "Clear it? (y/n)" — only a plain y empties it, so
+Enter or anything else leaves it alone. If you have written nothing
+and the house gives you a line instead, you are shown that and asked
+nothing: there is nothing of yours to clear.

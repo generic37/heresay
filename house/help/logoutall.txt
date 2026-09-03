@@ -1,0 +1,12 @@
+.logoutall — close the house (owner)
+
+  .logoutall   confirms first, then drops every session but the owner's
+
+For maintenance. It clears EVERY rank, not just residents — and if you are
+not the owner, it logs you out too. The confirm says so before it acts.
+Only the owner can run it and still be standing afterwards; the
+owner's own session is never dropped, whoever runs it.
+
+Accounts are untouched and everyone may reconnect at once, so pair it with
+.logins off if you want the house to stay empty. Nothing is persisted by this
+command itself.

@@ -1,0 +1,9 @@
+.unban — lift a ban early (staff)
+
+  .unban <name|ip>   entry is allowed again
+
+Bans expire by themselves, so this is for ending one ahead of time. If
+nothing was banned under that name or address it says so. Logged as a fact.
+
+Lifting is gated like placing: you can only unban someone BELOW your own
+rank, so a ban placed from above you is not yours to undo.

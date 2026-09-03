@@ -1,0 +1,23 @@
+security — a glance at the locks
+
+  .security             counts over the last day, and nothing else
+
+Six numbers: failed login attempts, login timeouts, password resets
+made with a recovery code, recovery code sets regenerated, session
+takeovers, and accounts their owners deleted.
+
+Counts only. No names, no addresses, no times — the screen answers
+"is anything happening?", and when the answer is yes the server log
+is where the answer to "who, and from where?" lives. That split is
+deliberate: a number tells you to go and look, and looking is a thing
+someone should have to decide to do.
+
+The window is the house's security_window_hours (a day by default).
+It can never reach further back than the event log itself keeps, so a
+larger setting simply shows everything still held.
+
+Re-consenting to a revised agreement is not counted. It happens to
+everyone at once whenever the agreement changes, and a row that says
+"the whole house" tells you nothing about anybody.
+
+owner only.

@@ -1,0 +1,13 @@
+.staffmail — read the shared staff letterbox (staff)
+
+  .staffmail   every note residents have left for staff
+
+One box, shared by all staff — .mail_staff is how residents write to it.
+Numbered, with sender and date, so .dstaffmail can clear one for everyone
+once it is handled. It is ordinary mail underneath: encrypted at rest,
+capped, and purged after 180 days.
+
+Staff are told "You have staff mail." at login, and nowhere else. Unlike
+personal mail, that line fires whenever the box is not empty: the box is
+shared, so one person reading it cannot mean everyone has. Clear a handled
+note with .dstaffmail and it stops for all of you.

@@ -1,0 +1,7 @@
+name: stall
+exits: mirror_hall, spring, concourse
+lockable: yes
+
+A shopfront barely wider than its door, with shelves to the ceiling and
+one of everything on them. The proprietor is elsewhere. A hand-lettered
+card says BACK SHORTLY and has faded almost white.

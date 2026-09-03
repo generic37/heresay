@@ -1,0 +1,16 @@
+.mailpurge — delete a whole mailbox unread (owner)
+
+  .mailpurge <name>   their entire box, gone
+
+For a spammed box, and nothing else. It DELETES without decrypting: no one,
+at any rank, can read another's mail, and this power is deliberately the
+kind that destroys rather than reveals. It does not touch their .revtell
+buffer. Logged as a fact — the fact of it, never a word of what was in it.
+
+It asks for YOUR OWN password first, like .deleteuser and .resetpassword.
+Someone's letters are gone for good afterwards, and one mistyped line
+should not be enough to do that. The password guards the accident, not
+the contents — nothing is read either way.
+
+You can only purge the mail of someone below your own rank, and never the
+owner's.

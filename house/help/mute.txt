@@ -1,0 +1,6 @@
+.mute — suppress specific users communications
+
+.mute <name> stops their says, emotes, shouts, tells and invites
+from reaching you for this session only, and only for you; they are
+not told. .unmute restores them. The talker equivalent of turning
+your chair the other way.

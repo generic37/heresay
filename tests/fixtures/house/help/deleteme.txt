@@ -1,0 +1,6 @@
+.deleteme — leave for good
+
+Deletes your account, description, profile, mailbox and review
+buffer, permanently, after you confirm with your password. Mail you
+sent to others stays in their boxes. The name becomes free. There
+is no undo. Nobody can do this for you or to you.

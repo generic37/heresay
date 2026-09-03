@@ -1,0 +1,11 @@
+.quit — leave the talker
+
+Announces your going (your .set logout_msg) and closes the
+connection. What you said stays only in the memories of those
+present (or in the entry room's fading .rev buffer).
+Shortcuts are: .q .x
+
+It is also a full logout: if you had .remember on, quitting signs
+you out on every device and you type your password next time. The
+setting stays on, so that login remembers you again. To stay logged
+in, close the tab instead. (.help remember)

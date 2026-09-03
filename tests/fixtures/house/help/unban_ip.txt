@@ -1,0 +1,13 @@
+.unban_ip — lift the ban on someone's address (staff)
+
+  .unban_ip <name>
+
+The mirror of .ban_ip: you name the person you banned, and the house
+finds the same address and lifts it. As everywhere, you never see the
+address and never have to type one.
+
+For an account ban, .unban <name>. Two bans, two commands, because
+banning a person and banning an address are two different things.
+
+Lifting does not erase the history — the house still knows the address
+was banned once, which is what lets it warn whoever bans next.

@@ -1,0 +1,12 @@
+.deleteuser — erase an account permanently (owner)
+
+  .deleteuser <name>   two gates, then it is gone
+
+GONE: the account, their profile, their mailbox, and their private .revtell
+lines. There is no undo. Two gates, in order: re-type the username exactly
+(this is the one that catches "wrong person"), then your OWN password.
+Either one failing cancels with nothing touched.
+
+The name is freed for re-registration and they are disconnected if online.
+NOT touched: mail they SENT (it is the recipients', not theirs), and any
+ban on the name or IP — deletion is not a way around one. Logged as a fact.

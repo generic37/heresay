@@ -1,0 +1,6 @@
+name: thicket
+exits: den, copse, oak, concourse
+
+Close-grown scrub, thorn and bramble, with a path through it that is more
+of a rumour. Things move alongside you at about knee height and decline to
+be seen.

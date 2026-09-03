@@ -1,0 +1,6 @@
+name: orchard
+exits: lodge, atrium, glade, spring, concourse
+
+Old trees in rows that have stopped being rows, standing in long grass.
+Windfalls underfoot. Whatever was planted here was planted by somebody who
+did not expect to eat from it.

@@ -1,0 +1,20 @@
+     rampart
+        |
+   mirror hall --- stall
+     /     \
+ rotunda  gallery
+             |
+   lawn -- atrium -- orchard
+     |       |          |
+   plaza    oak       lodge
+     |       |
+   hall   parlour --- glade
+     |       |
+ refectory  copse -- cabin
+             |
+          thicket -- den
+
+  spring  shore  grotto  overlook
+
+  every room also opens on
+  the concourse.

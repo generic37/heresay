@@ -1,0 +1,14 @@
+                        .-----------.
+                        |           |
+                        |   void    |
+                        |           |
+                        '-----------'
+
+
+          This is the TEMPLATE map. It is ART, printed byte for
+          byte by `.map` — draw whatever suits your house, or
+          delete world/map.txt and `.map` shows nothing at all.
+
+          ⚠ The map is not the graph. Where people can actually
+          walk is the union of every room file's `exits:` line;
+          nothing here is read by the engine.

@@ -1,0 +1,8 @@
+.recovery — recovery if password forgotten
+
+Shows how many one-time codes you have left. .recovery new trades
+your old set for five fresh ones, shown once — copy them somewhere
+real. Forgot your password? At the login prompt type recover, give
+one code, choose a new password; that code is spent. Lose the
+password and all five codes, and the name is gone for good. That is
+the deal.

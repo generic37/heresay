@@ -1,0 +1,6 @@
+name: glade
+exits: parlour, orchard, concourse
+
+A clearing in the trees where the light comes down in one soft column.
+The grass is flattened in a ring, as if something large had slept here and
+then thought better of mentioning it.

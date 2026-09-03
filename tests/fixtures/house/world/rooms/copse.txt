@@ -1,0 +1,6 @@
+name: copse
+exits: cabin, thicket, oak, concourse
+
+A stand of young trees, thin and close and all the same age, as though
+they had all agreed to start together. The light comes through in bars and
+the ground is bare.

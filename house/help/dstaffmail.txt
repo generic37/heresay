@@ -1,0 +1,7 @@
+.dstaffmail — clear a staff-mail message for ALL staff (staff)
+
+  .dstaffmail <n>   delete message n from the shared box
+
+The box is shared, so this deletes it for all staff — the point being
+that whoever handles a note clears it and nobody works it twice. Numbers
+come from .staffmail; they shift as messages go. Logged as a fact.

@@ -1,0 +1,9 @@
+.theme — the terminal's colours (web client)
+
+  .theme default   warm off-white on near-black
+  .theme green     phosphor green
+  .theme amber     amber
+
+The browser handles it and remembers it; nothing reaches the house, and nobody
+else sees any difference. Socket doors have their own colours — see .set dim
+for the one thing the server controls there.

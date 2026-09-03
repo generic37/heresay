@@ -1,0 +1,12 @@
+.promote — lift someone one rung (owner)
+
+  .promote <name>   one rank up, persisted
+
+They gain the new rank at once if online, and keep it across restarts.
+
+Two limits, and they are the point. The person must be BELOW your own rank
+— you cannot promote a peer, or yourself. And the result may reach your own
+rank but never pass it. The owner is named in the server config, not
+granted here, so this can never make another owner.
+
+Logged as a fact. .demote is the way back.

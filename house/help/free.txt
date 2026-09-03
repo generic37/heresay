@@ -1,0 +1,13 @@
+.free — let someone out of jail (staff)
+
+  .free <name>    back to the entry room, flag cleared
+
+They are shown the house's release line (.ownerset release_msg) and the
+room they land in. Clears the persistent status, so a relog no longer puts
+them back. With no jail room configured this says so and does nothing.
+Logged as a fact.
+
+You can only free someone BELOW your own rank — a release decided above you
+is not yours to undo — and you cannot free yourself. The owner is the
+one exception: they can free themselves, so that a jailed owner is never
+locked in.

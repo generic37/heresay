@@ -1,0 +1,12 @@
+.demote — lower someone one rung (owner)
+
+  .demote <name>   one rank down, persisted
+
+Takes the rank away at once if they are online. Stops at the bottom of the
+ladder — there is nothing below it.
+
+You can only demote someone BELOW your own rank: not a peer, not anyone
+above you. The owner's own rank comes from the server config and cannot
+be demoted from in here.
+
+Logged as a fact.

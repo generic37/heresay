@@ -1,0 +1,6 @@
+name: hall
+exits: plaza, oak, concourse
+
+A high panelled hall with a long table down the middle and a gallery
+above. It is set up for something formal, and has been for years. Nobody
+remembers what.

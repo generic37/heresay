@@ -1,0 +1,6 @@
+.map — a map of the world
+
+The hand-drawn map of the house, connections and all. It is ART,
+drawn by whoever built this world: some places may not be on it,
+and the map does not mind. What the map shows and where .go will
+take you are two different files. Shortcut: .m

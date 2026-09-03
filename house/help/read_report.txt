@@ -1,0 +1,16 @@
+.read_report — read the report box
+
+Lists every report filed, newest last, with who filed it and when.
+New ones are marked with a *; reading the box clears the "unread
+report" notice you get at login.
+
+There is no delete. A report leaves the box only by expiring, after
+100 days. That is deliberate: a box its own reader can quietly empty
+would not be much of a record.
+
+The box is shared, so reading it marks everything read for everyone
+who can see it. Reports are ordinary mail underneath — encrypted at
+rest, capped, and aged out by the same machinery.
+
+Who may read this is a permission like any other. By default it is
+the owner alone; the operator can widen it.

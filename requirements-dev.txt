@@ -1,0 +1,31 @@
+# Heresay — the DEVELOPMENT-only dependencies. (v1.48.0, audit G2)
+#
+# ⛔ NOTHING HERE IS EVER INSTALLED IN PRODUCTION. `make venv` and
+# `deploy/deploy.sh` install `requirements.txt` and nothing else, so the
+# production venv holds three packages and their closure — no test framework, no
+# build backend, no auditing tools. A test runner on a live host is code that
+# runs as the daemon's user for no reason anybody can state.
+#
+# Install it with `make venv-dev`, which layers this on top of the runtime file.
+#
+# ⚠ PINNED, BUT NOT HASHED, AND THE ASYMMETRY IS DELIBERATE — not laziness.
+# `--require-hashes` is all-or-nothing across an install, and the audit tooling
+# below depends on `pip` and `setuptools`, which cannot be hashed; pip-compile
+# generates the file and then warns that pip will reject it. A hashed dev file
+# that does not install is worse than an honest pinned one. The file that
+# actually reaches a server is the one that carries hashes.
+#
+# ⚠ And that is also why this file does NOT `-r requirements.txt`: mixing hashed
+# and unhashed requirements in one install is an error. `make venv-dev` runs the
+# two installs in sequence instead, so the runtime half keeps its hashes.
+
+# The test suite. Pinned exactly — a pytest or pytest-asyncio version change can
+# move test behaviour, so this is the pair the suite's results were obtained on.
+pytest==9.1.1
+pytest-asyncio==1.4.0
+
+# ⚠ Deliberately UNPINNED. These are tools, not test-behaviour: pip-audit is
+# only as good as how current it is, and pinning an advisory scanner to a
+# release is how you keep passing a check that stopped knowing about anything.
+pip-audit
+pip-tools

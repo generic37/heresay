@@ -1,0 +1,50 @@
+[project]
+# Distribution/package name matches the engine's user-facing name, Heresay
+# (the package was renamed from "talker" to "heresay" in v1.15.0).
+name = "heresay"
+# ⛔ NOT A LITERAL. The version is READ from `heresay.__version__`, which is the
+# one place it lives — see `[tool.setuptools.dynamic]` below. A number written
+# here would be a second store, and a second store is one nobody remembers to
+# update.
+dynamic = ["version"]
+description = "Heresay — a presence-only telnet-talker chat engine (NUTS lineage). What's said here stays here."
+license = "AGPL-3.0-or-later"
+requires-python = ">=3.12"
+# Floors are raised to current-safe minimums (websockets>=13 for the asyncio
+# server API this uses; cryptography>=43.0.1 past older-line advisories). For a
+# reproducible production build, pin exact versions in a lockfile rather than
+# relying on these lower bounds.
+dependencies = [
+    "argon2-cffi>=23.1",
+    "websockets>=13.1",
+    "cryptography>=43.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.23",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = [".", "tests"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["heresay", "heresay.commands"]
+
+# Where `dynamic = ["version"]` above gets its answer. setuptools reads the
+# assignment statically, so building needs nothing importable and no dependency
+# installed.
+[tool.setuptools.dynamic]
+version = {attr = "heresay.__version__"}
+
+[tool.setuptools.package-data]
+# Ship the engine data (the common-password blocklist + its NOTICE) inside the
+# package so a pip install carries it, not just the source checkout.
+heresay = ["data/*.txt"]

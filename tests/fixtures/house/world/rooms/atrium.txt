@@ -1,0 +1,9 @@
+name: atrium
+exits: gallery, oak, plaza, orchard, concourse
+
+The atrium is where everyone arrives, and it has the worn look of a place
+that knows it. A wide floor of pale stone, a ceiling too high to make out,
+and doorways on every side standing open. Somebody has left a coat over the
+back of a chair nobody is sitting in.
+
+Voices carry here. They do not carry out.

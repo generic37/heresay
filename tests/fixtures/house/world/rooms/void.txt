@@ -1,0 +1,7 @@
+name: void
+
+Nothing here yet.
+
+This is where a house begins: one room, no exits, and a name. Write your
+own rooms into world/rooms/ and point [world] entry_room at whichever one
+should be the front door.

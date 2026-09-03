@@ -1,0 +1,6 @@
+name: rampart
+exits: rotunda, mirror_hall, concourse
+
+A broad stone wall wide enough to walk two abreast along the top of, with
+a parapet on the outward side and a long drop on the other. It defends
+nothing any more and does it very well.

@@ -1,0 +1,6 @@
+name: shore
+exits: spring, grotto, concourse
+
+A long grey beach of small flat stones that shift and click underfoot.
+The water arrives without much conviction and leaves again. Somebody has
+built a cairn and somebody else has knocked most of it over.

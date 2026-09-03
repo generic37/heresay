@@ -1,0 +1,25 @@
+ignore — hide a kind of line, for you alone (.mute hides a person)
+
+  .ignore                 list them all
+  .ignore <cat> yes|no    hide it / show it
+  .ignore <cat> default   back to the default (which is: shown)
+  .ignore default         show every category again
+
+login_msg     logging in — jailed arrivals included
+logout_msg    logging out
+enter_msg     someone walking into your room
+exit_msg      someone walking out of your room
+afk_msg       someone going AFK in your room
+shout         shouts from elsewhere
+atmospherics  the room's own murmurs
+tab_alert     the browser tab mark when you're away (web door only)
+
+Every category starts shown, and 'default' always means shown — unlike
+.set, nothing here follows a house setting. Some names match .set
+topics; that is a coincidence of naming, not a shared value.
+
+What you ignore is also left out of .rev — it replays the room as you
+would have seen it live, not as everyone else did.
+
+Two things show whatever you set: staff entering a locked room, and the
+AFK notice on a tell you just sent.

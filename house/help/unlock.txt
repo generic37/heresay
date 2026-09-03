@@ -1,0 +1,6 @@
+.unlock — unlock the room you are in
+
+In a locked room, anyone inside may .unlock the door; the room sees
+it open. Locks also lift on their own when the last person leaves —
+no room is ever found locked and empty. See .help lock for the
+other half.

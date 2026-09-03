@@ -1,0 +1,7 @@
+.revtell — your own last 20 private lines
+
+Tells and remotes, sent and received, in the wording you saw them.
+Held on disk, encrypted like mail, so a dropped connection doesn't
+lose the thread. Yours alone — no rank can read another's. Deleted
+with your account. Not technically secret from whoever runs the
+machine — the same honest limit the agreement states about mail.

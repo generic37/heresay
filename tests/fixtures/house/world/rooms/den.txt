@@ -1,0 +1,6 @@
+name: den
+exits: thicket, concourse
+
+A hollow under a bank, roofed with roots and floored with dry leaf.
+Something lives here. It is out. It has clearly been out for some time,
+which is the only reason you are still standing in the doorway.

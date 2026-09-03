@@ -1,0 +1,6 @@
+name: plaza
+exits: atrium, lawn, hall, refectory, concourse
+
+A wide paved square laid out in black and white, big enough that crossing
+it feels like a decision. Benches at the edges. In the middle, nothing at
+all, which is the point of a plaza.

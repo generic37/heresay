@@ -1,0 +1,6 @@
+name: lawn
+exits: gallery, plaza, concourse
+
+A flat green lawn, mown in stripes by somebody with strong opinions about
+stripes. Hoops are set out for a game whose rules were last written down a
+long time ago and have been improved since.

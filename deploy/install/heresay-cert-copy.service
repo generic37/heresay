@@ -1,0 +1,9 @@
+# Copy Caddy's LE cert to the heresay :2323 door and restart on change.
+# Triggered by heresay-cert-copy.timer. Install to /etc/systemd/system/.
+[Unit]
+Description=Copy Caddy's cert to heresay's TLS door (restart on change)
+After=caddy.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/heresay/deploy/bin/heresay-cert-copy.sh

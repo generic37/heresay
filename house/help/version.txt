@@ -1,0 +1,5 @@
+.version — what is running
+
+Shows the version of the talker serving you, e.g. 1.0.0. The number
+moves when the house changes: fixes bump the last digit, new
+abilities the middle, and changes to the covenant itself the first.

@@ -1,0 +1,55 @@
+By continuing you affirm that you are 18 or older, and that you will
+be decent and keep it legal. You also understand:
+
+1. Almost nothing said here is recorded. Conversation vanishes as it
+   scrolls away; there is no history to request. Two narrow
+   exceptions: the entry room keeps the last {rev_window_minutes}
+   minutes of what was said in passing memory (never on disk, gone on
+   restart), fading as it goes, so arrivals can see the room is alive
+   — .rev shows it; and your own last {revtell_count} tells and
+   remotes are held, encrypted, so you can pick a conversation back
+   up with .revtell.
+   If you want privacy from later entrants, speak somewhere other
+   than the entry room.
+
+2. A mail message you send is held, encrypted, until the recipient
+   deletes it (or 180 days pass). Mail and review buffers are private
+   by design — no command exists, at any rank, to read another's —
+   but they are not end-to-end encrypted: in principle, whoever
+   operates the server could read what the server holds. You must
+   decide how much to trust the house you're standing in.
+
+3. Connections are noted. When you connect, the time and your
+   connection's IP address are recorded; and certain actions — staff
+   using a power, a password reset — are noted against the account
+   they concern. Never a word of what was said. These notes are kept
+   about {event_retention_days} days and then deleted, and only the
+   {owner} can read them from inside the house, to answer abuse or
+   trace trouble.
+
+4. Though the house records almost nothing, the people in a room with
+   you may capture text or take screenshots. Words reach eyes; eyes
+   remember.
+
+5. Your account is a name and a password — no email, nothing else. If
+   you lose the password, your recovery codes are the only way back
+   in. Keep them somewhere real.
+
+6. You can delete your own account at any time with .deleteme, which
+   removes your account, profile, mailbox, and review buffers,
+   permanently.
+
+7. Staff keep the peace: they may gag, jail, ban, or remove accounts
+   that break the law or make the rooms unpleasant to be in. No one —
+   at any rank — can read your mail or your .revtell.
+
+8. Locked doors are privacy from other residents, not from the house.
+   Staff may force a lock, and you will always see them enter — there
+   is no invisible observation. Please don't give them a reason to
+   force a lock.
+
+9. This house is offered as-is: no warranty, no promise of uptime, no
+   permanence except what these rules state.
+
+Questions or trouble: .call_staff <text> — or leave a note for the
+house with .mail_staff <text>.

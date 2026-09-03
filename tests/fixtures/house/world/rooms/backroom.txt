@@ -1,0 +1,8 @@
+name: backroom
+staff_only: yes
+refusal: The door does not know you.
+
+A small room behind the front of the house: a kettle, a table, three
+mismatched chairs and a corkboard nobody has tidied since spring. This is
+where the people who keep the place running come to stop keeping it running
+for ten minutes.

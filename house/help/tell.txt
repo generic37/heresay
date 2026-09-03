@@ -1,0 +1,7 @@
+.tell — private message, anywhere
+
+.tell <name> <text> reaches one person wherever they are; you both
+see the same line: >> Corvid says: hello. The >> marker is the only
+sign a line was private. After the first tell .tell <text> alone 
+continues with the same person, your last correspondent, until you 
+name another. Your last 20 private lines are in .revtell.

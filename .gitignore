@@ -1,0 +1,71 @@
+# Account + mail state is operator/runtime, not source. Mail is encrypted at
+# rest; its key must never be committed.
+accounts.json
+mailboxes.json
+mail.key
+revtells.json
+# One file per box since v1.52.5 — the stores are directories now (derived from
+# the configured paths), plus the single files they were split from.
+mailboxes.json.d/
+revtells.json.d/
+*.pre-split
+bans.json
+resume.json
+state.json
+events.jsonl
+ban_history.json
+
+# ⛔ The alerting secrets. The REAL file lives at /etc/heresay/notify.env on the
+# server and has no business in a checkout — but knowing either value IS the
+# permission (the ntfy topic is the only auth on the topic; the Healthchecks URL
+# silences the backup alarm), so a stray copy here is ignored rather than left
+# one `git add -A` away from being public. Only notify.env.EXAMPLE is tracked.
+notify.env
+
+# ⚠ `permissions.toml` in this tree is the SHIPPED TEMPLATE and is committed:
+# it is what a fresh install starts from, and is where `.reboot` ships disabled.
+# An install edits `/etc/heresay/permissions.toml`, never this copy.
+
+# Throwaway dev/verification state (make run-dev). Safe to delete wholesale.
+devstate/
+
+# Offsite backups pulled from the production server (make fetch-backup). These
+# hold encrypted mail, encrypted .revtell buffers, the key that decrypts both,
+# and password hashes — sensitive, never commit.
+backups/
+
+# TLS material (self-signed dev cert). Never commit keys.
+certs/
+*.pem
+*.key
+*.crt
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# Operator-local deploy settings (host alias); never committed.
+deploy/local.env
+
+# Local dev-tool state, and any git worktrees created under it. Machine-local
+# scratch: it belongs to one checkout on one box, never to the public repo.
+# deploy.sh excludes it too, so it cannot ride an rsync onto the live host.
+.claude/
+
+# The generic distribution BUILD OUTPUT (tools/build-generic.py). Reproducible
+# from the manifest + skel/, never committed: what is committed is the builder
+# and its sources, so the public oak stays a reviewable artifact rather than a
+# second copy of the repo drifting beside the first.
+dist-generic/
+
+# ⛔ Report capture files (v1.58.0) — the operator's record: an accusation in
+# plaintext, naming both people, with every address either was seen on. It lives
+# in the state dir in production; this covers a dev run whose config puts the
+# state dir at the repo root. It must never be committed.
+reports/
+

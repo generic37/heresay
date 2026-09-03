@@ -1,0 +1,6 @@
+.call_staff — call for assistance, not conversation
+
+.call_staff <text> reaches all staff awake right now, with your room
+indicated. If none are awake, .mail_staff <text> leaves a note in the
+house letterbox that every staff account sees at login. Command works
+even while gagged.

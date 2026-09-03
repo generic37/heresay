@@ -1,0 +1,7 @@
+.dmail — delete a letter
+
+.dmail <n> deletes message n from your mailbox, the numbers show
+when you read .mail. Note that numbers may reassign upon a delete. 
+Deleting is deleting: the letter is gone at that moment, not archived,
+not recoverable. Any letter left in the box is purged by the
+house after 180 days regardless.

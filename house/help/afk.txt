@@ -1,0 +1,6 @@
+.afk — step away
+
+Marks you away from keyboard (AFK) in .who and answers tells with your reason.
+.afk <text> for a one-off, bare .afk uses your .set afkmsg (or default). Any 
+input brings you back. Idle as long as you like; the house never sweeps anyone
+out though reboots happen.

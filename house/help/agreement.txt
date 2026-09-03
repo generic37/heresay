@@ -1,0 +1,20 @@
+agreement — the terms, whenever you want them
+
+  .agreement            show the house agreement
+
+The text you were shown when you made your account, laid out for the
+screen you are reading it on. Nothing is asked and nothing happens:
+it is the agreement, not the prompt.
+
+It is the CURRENT text, and that is the same thing as the text you
+agreed to. If it is ever revised you are asked again at your next
+login, so what stands here is always what stands between you and the
+house.
+
+Two things it is worth re-reading it for: what the house keeps (very
+little, and each exception named), and the honest limit on the
+encryption — the mail and private lines it holds are encrypted at
+rest, not end to end, so whoever runs the server could read what the
+server holds.
+
+Everyone can read it, at any rank.

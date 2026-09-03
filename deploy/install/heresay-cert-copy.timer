@@ -1,0 +1,11 @@
+# Daily at 09:00 UTC (4-5am US Eastern — quiet hours): copy Caddy's cert to the
+# :2323 door, restarting heresay only if it changed (~every 60 days at renewal).
+[Unit]
+Description=Daily heresay cert copy (09:00 UTC)
+
+[Timer]
+OnCalendar=*-*-* 09:00:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

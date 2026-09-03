@@ -1,0 +1,5 @@
+.unmute — hear them again
+
+.unmute <name> undoes a .mute: their says, emotes, shouts, tells
+and invites reach you once more. Mutes are yours alone and last
+only the session, so a reconnect also clears them.
